@@ -1,0 +1,456 @@
+\chapter{Experimentos}  
+\label{ch:Experimentos}
+
+En este capítulo se presentan las pruebas realizadas al sistema y el \texttt{hardware} necesario
+para la reproducción de las mismas. Estos experimentos se dividen en siete pruebas, una por cada cliente 
+con el objetivo de comprobar su correcto funcionamiento y una séptima de rendimiento temporal de recepción de vídeo de las cámaras.
+
+\section{Experimentos con CameraViewJS}
+Este experimento consiste en una ejecución típica del cliente \texttt{CameraViewJS} desarrollado. Para ello se ejecuta \texttt{cameraserver} 
+en un PC y el cliente tanto en otro PC como en un móvil estando todos en la misma red local.
+
+En la figura \ref{fig:equipos_camview} se puede observar la función que cumplen cada uno de los componentes de las pruebas.
+Como servidor de imágenes ICE se utilizó un ordenador de la universidad
+con un procesador Intel(R) Core(TM)2 Quad 2.66GHz con 4GbiB de memoria RAM. En este
+PC se instaló la distribución Ubuntu de JdeRobot 5.3.1 y se le conectó la webcam logitech. 
+Esta máquina se usa tanto como servidor \texttt{cameraserver} como servidor HTTP donde albergar los clientes.
+
+Como cliente 1 se utilizó un portátil Acer Ferrari One 
+con un procesador AMD Athlon(tm) Dual Core L310 y 4 GbiB de memoria RAM. En él se instalaron 
+los navegadores Firefox, Chrome y Opera para realizar la pruebas.
+
+Como cliente 2 se utilizó un \textit{SmartPhone} Elephone P6000 con un procesador MTK6732 de 64Bits a 1.5GHz 
+y 2GbiB de memoria RAM. En él se instalaron los navegadores Firefox, Chrome y Opera para realizar la pruebas.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/equipos.png}
+\caption{Equipos usados en este experimento y su función.} \label{fig:equipos_camview}
+\end{figure}
+
+
+Como se puede ver en las figuras \ref{fig:interfaz_cameraview_exp}, funciona igual tanto en móvil como en PC. 
+La tasa de refresco de las imágenes 
+varía si cliente y servidor se ejecutan en el mismo PC (8 FPS) o en diferente (4 FPS). El tamaño de imagen idóneo es 320x240 píxeles 
+porque más pequeñas se perdería mucha calidad y mayores producen un desplome de los fotogramas por segundo hasta quedarse en 2-3 FPS en la misma máquina.
+Además hay que comentar que en algunas de las pruebas se han llegado a conseguir 25 FPS en el mismo PC sin ninguna razón aparente porque no se realizó ningún cambio, 
+lo único que se hizo fue parar tanto cliente y servidor y volverlos a arrancar.
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\includegraphics[width=0.6\textwidth]{./img/interfaz_cameraview1.png}}
+\hspace{1cm}
+\subfigure[]{\includegraphics[width=0.3\textwidth]{./img/interfaz_cameraview2.png}}
+\caption{Cliente 1 (a) y Cliente 2 (b)}
+\label{fig:interfaz_cameraview_exp}
+\end{figure}
+
+\section{Experimentos con RgbdViewerJS}
+Este experimento consiste en una ejecución típica del cliente \texttt{RgbdViewerJS} desarrollado. Para ello se ejecuta \texttt{Openni1Server} 
+en un PC teniendo conectado un Kinect y el cliente en otro PC estando todos en la misma red local.
+
+En la figura \ref{fig:equipos_rgbd} se puede observar la función que cumplen cada uno de los componentes de las pruebas.
+Como servidor de imágenes RGBD ICE se utilizó un ordenador de la universidad
+con un procesador Intel(R) Core(TM)2 Quad 2.66GHz con 4GbiB de memoria RAM. En este
+PC se instaló la distribución Ubuntu de JdeRobot 5.3.1 y se le conectó el Kinect. 
+Esta máquina se usa tanto como servidor \texttt{Openni1Server} como servidor HTTP donde albergar los clientes.
+
+Como cliente se utilizó un portátil Acer Ferrari One 
+con un procesador AMD Athlon(tm) Dual Core L310 y 4 GbiB de memoria RAM. En él se instalaron 
+los navegadores Firefox, Chrome y Opera para realizar el experimento.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/equipos_rgbdviewerjs.png}
+\caption{Equipos usados en estas pruebas y su función.} \label{fig:equipos_rgbd}
+\end{figure}
+
+Como se puede ver en la 
+figura \ref{fig:interfaz_rgbdviewer_exp}, funciona correctamente. En este caso los experimentos han estado algo limitados debido 
+a que para trabajar con el Kinect se necesita mucha capacidad de procesamiento, por lo que rara vez se pasaba de 1 FPS en la recepción de las imágenes. Hay que destacar 
+que se comprobaron los valores mediante el \texttt{RgbdViewer} escrito en C++ y este no pasaba de 2 FPS así que asumimos que el \textit{hardware} limitaba dicho experimento.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/rgbdviewer12.png}
+\caption{Ejecución de cliente}
+\label{fig:interfaz_rgbdviewer_exp}
+\end{figure}
+
+\section{Experimentos con KobukiViewerJS}
+Este experimento consiste en una ejecución típica del cliente \texttt{KobukiViewerJS} desarrollado tanto en real como simulado. las pruebas consistieron 
+en teleoperar un robot Kobuki tanto real como simulado estando cliente y servidor en la misma red local. 
+
+En la figura \ref{fig:equipos_kobukiviewer} se puede observar la función que cumplen cada uno de los componentes de las pruebas.
+Como servidor de robot simulado con gazebo se utilizó un ordenador de la universidad
+con un procesador Intel(R) Core(TM)2 Quad 2.66GHz con 4GbiB de memoria RAM. En este
+PC se instaló la distribución Ubuntu de JdeRobot 5.3.1. 
+Esta máquina se usa tanto como servidor de kobuki simulado como servidor HTTP donde albergar los clientes.
+
+Como cliente de simulador y servidor \texttt{Kobuki\_driver} se utilizó un portátil Acer Ferrari One 
+con un procesador AMD Athlon(tm) Dual Core L310 y 4 GbiB de memoria RAM. En él se instalaron 
+los navegadores Firefox, Chrome y Opera para realizar la pruebas.
+
+Como cliente para Kobuki real se utilizó un \textit{SmartPhone} Galaxy Note II con un procesador Quad-Core a 1.6GHz 
+y 2GbiB de memoria RAM. En él se instalaron los navegadores Firefox, Chrome y Opera para realizar la pruebas.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/equipos_kobuki.png}
+\caption{Equipos usados en este experimento y su función.} \label{fig:equipos_kobukiviewer}
+\end{figure}
+
+
+La prueba con el robot simulado consistió en ejecutar en el PC de la universidad el simulador Gazebo y teleoperarlo desde el cliente \texttt{KobukiViewerJS} ejecutado en el portátil.
+La prueba con el robot real se realizó en el Laboratorio de robótica de la Universidad, en este caso el servidor era el Portátil que estaba ejecutando \texttt{Kobuki\_driver} 
+conectado al robot Kobuki mediante USB y el cliente era el \textit{SmartPhone}. Ambos experimentos tuvieron un resultado satisfactorio como se muestra en las imágenes \ref{fig:kobuki_driver}.
+Un pequeño problema que se ha detectado en algunos casos es un pequeño retardo a la hora de recibir las imágenes que en algunas ocasiones llegaba incluso a perder la conexión con las cámaras.
+En estos casos el resto de conexiones han seguido funcionado perfectamente en todo momento.
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\includegraphics[width=0.45\textwidth]{./img/kobukiviewer_body.png}}
+\hspace{1cm}
+\subfigure[]{\includegraphics[width=0.45\textwidth]{./img/kobuki_real.png}}
+\caption{Simulado (a) y Real (b)}
+\label{fig:kobuki_driver}
+\end{figure}
+
+
+
+\section{Experimentos con UavViewerJS}
+Este experimento consiste en una ejecución típica del cliente \texttt{UavViewerJS} desarrollado tanto en real como simulado. las pruebas consistieron 
+en teleoperar un robot Kobuki tanto real como simulado estando cliente y servidor en la misma red local. 
+
+En la figura \ref{fig:equipos_uavviewerjs} se puede observar la función que cumplen cada uno de los componentes de las pruebas.
+Como servidor de drone simulado con gazebo se utilizó un ordenador de la universidad
+con un procesador Intel(R) Core(TM)2 Quad 2.66GHz con 4GbiB de memoria RAM. En este
+PC se instaló la distribución Ubuntu de JdeRobot 5.3.1. 
+Esta máquina se usa tanto como servidor de drone simulado como servidor HTTP donde albergar los clientes.
+
+Como cliente de simulador y servidor \texttt{Ardrone\_server} se utilizó un portátil Acer Ferrari One 
+con un procesador AMD Athlon(tm) Dual Core L310 y 4 GbiB de memoria RAM. En él se instalaron 
+los navegadores Firefox, Chrome y Opera para realizar la pruebas.
+
+Como cliente para el drone real se utilizó un \textit{SmartPhone} Elephone P6000 con un procesador MTK6732 de 64Bits a 1.5GHz 
+y 2GbiB de memoria RAM. En él se instalaron los navegadores Firefox, Chrome y Opera para realizar la pruebas.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/equipos_uavviewerjs.png}
+\caption{Equipos usados en este experimento y su función.} \label{fig:equipos_uavviewerjs}
+\end{figure}
+
+La prueba con el drone simulado consistió en ejecutar en el PC de la universidad el simulador gazebo y teleoperarlo desde el cliente \texttt{UavViewerJS} ejecutado en el portátil.
+La prueba con el drone real se realizó en el Laboratorio de robótica de la Universidad, en este caso el servidor era el Portátil que estaba ejecutando \texttt{Ardrone\_server} 
+conectado al drone mediante la red WiFi que genera el propio drone y el cliente era el \textit{SmartPhone}. 
+Ambos experimentos tuvieron un resultado satisfactorio como se muestra en las imágenes \ref{fig:uav_exp}. En el caso del real hay un pequeño retardo en el envío de órdenes al drone
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\includegraphics[width=0.48\textwidth]{./img/uavviewer_body.png}}
+\hspace{0.2cm}
+\subfigure[]{\includegraphics[width=0.48\textwidth]{./img/drone_real.png}}
+\caption{Simulado (a) y Real (b)}
+\label{fig:uav_exp}
+\end{figure}
+
+Además, en el caso de este cliente se hicieron unas  exhibiciones en la Global Robot Expo, 
+feria de robótica de Madrid\footnote{\url{http://blog.jderobot.org/estuvimos-en-global-robot-expo/}} (figura \ref{fig:globalrobotexpo_exp})
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\includegraphics[width=0.48\textwidth]{./img/globalrobotexpo.jpg}}
+\hspace{0.2cm}
+\subfigure[]{\includegraphics[width=0.48\textwidth]{./img/globalrobotexpo_exp.png}}
+\caption{Presentación en Global Robot Expo}
+\label{fig:globalrobotexpo_exp}
+\end{figure}
+
+\section{Experimento con IntrorobKobukiJS}
+Este experimento consiste en la programación de una aplicación concreta en JavaScript para el robot kobuki, hecha dentro de la herramienta 
+\texttt{IntrorobKobukiJS} desarrollada. La prueba consistió en programar un pequeño comportamiento en JavaScript 
+probarlo en el kobuki simulado. Se utilizó el mismo \textit{hardware} que \texttt{KobukiViewerJS} 
+
+La prueba con el robot simulado consistió en ejecutar en el PC de la universidad el simulador Gazebo y 
+ejecutar el comportamiento programado desde el cliente \texttt{IntrorobKobukiJS}. 
+El cliente estaba ejecutándose desde el portátil. El comportamiento desarrollado era un choca-gira, el robot avanza hasta que percibe mediante el laser 
+que tiene un obstáculo muy cerca, entonces retrocede, gira y vuelve a avanzar.
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+function reanudar (){
+   postMessage({v:30,w:0,interval:1});
+}
+function giro(){
+   var t = Math.floor((Math.random() * 10) + 1);
+   postMessage({v:0,w:-10,interval:0});
+   setTimeout(reanudar,t*100);
+}
+function atras(){
+   postMessage({v:-20,w:0,interval:2});
+   setTimeout(giro,500);
+}
+
+onmessage = function(e) {
+    
+   var laser  = e.data.laser;
+   var pose3d = e.data.pose3d;
+   var caml = e.data.caml;
+   var camr = e.data.camr;
+   
+   var v = 0;
+   var w = 0;
+   
+   if (laser.distanceData[90]<1000){
+      atras();
+   }else{
+      postMessage({v:30,w:0,interval:0});
+   };
+}
+\end{lstlisting}
+
+El experimento tuvo un resultado satisfactorio como se muestra en las imágenes \ref{fig:introrobkobuki_exp}. Cada vez que se acercaba a una pared, retrocedía, giraba un tiempo aleatorio y 
+después seguía con su avance.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/introrobkobuki_exp1.png}
+\caption{Imagen del experimento}
+\label{fig:introrobkobuki_exp}
+\end{figure}
+
+
+\section{Experimentos con IntorobUavJS}
+Este experimento consiste en consiste en la programación de una aplicación concreta en JavaScript para el drone, hecha dentro de la herramienta 
+\texttt{IntorobUavJS} desarrollada. La prueba consistió en programar un pequeño comportamiento en JavaScript 
+y probarlo en el drone simulado. Se utilizó el mismo \textit{hardware} que en el experimento con \texttt{UavViewerJS} 
+
+La prueba con el drone simulado consistió en ejecutar en el PC de la universidad el simulador Gazebo y 
+ejecutar el comportamiento programado desde el cliente \texttt{IntorobUavJS}. 
+El cliente estaba ejecutándose desde el portátil. El comportamiento consistía en despegar, realizar un cuadrado volando y aterrizar en el mismo sitio aproximadamente.
+
+ \lstset{language=JavaScript}
+\begin{lstlisting}
+function calcDist (a,b){
+   return Math.sqrt(Math.pow(b.x-a.x,2)+Math.pow(b.y-a.y,2));
+}
+var step =0;
+var origen;
+var giro = 1;
+
+onmessage = function(e) {
+    
+   var pose3d = e.data.pose3d;
+   var cam1 = e.data.cam1;
+   
+   var linearX = 0;
+   var linearY = 0;
+   var linearZ = 0;
+   var angularZ = 0;
+   switch (step){
+      case 0:
+         postMessage({com:"takeoff",interval:0});
+         step++;
+         origen = pose3d;
+         break;
+      case 1:
+      case 3:
+      case 5:
+      case 7:
+         console.log(calcDist(origen,pose3d));
+         if (calcDist(origen,pose3d)<2){
+            linearX = 2;
+            postMessage({com:"sendVel",linearX:linearX,linearY:0,linearZ:0,angularZ:0,interval:0});
+            //console.log("send: linearX");
+         }else{
+            linearX = 0;
+            postMessage({com:"sendVel",linearX:linearX,linearY:0,linearZ:0,angularZ:0,interval:0});
+            console.log("send: linearX = 0");
+            step++;
+         }
+         break;
+      case 2:
+         console.log(Math.PI/2);
+         console.log(pose3d.yaw);
+         if (Math.PI/2>pose3d.yaw){
+            angularZ = 0.1;
+            postMessage({com:"sendVel",linearX:0,linearY:0,linearZ:0,angularZ:angularZ,interval:0});
+            console.log("send: angularZ = 1");
+         }else{
+            postMessage({com:"sendVel",linearX:0,linearY:0,linearZ:0,angularZ:0,interval:0});
+            console.log("send: angularZ = 0");
+            origen = pose3d;
+            giro++;
+            step++;
+         }
+         break;
+      case 4:
+         console.log(Math.PI*0.95);
+         console.log(pose3d.yaw);
+         if (0<pose3d.yaw){
+            angularZ = 0.1;
+            postMessage({com:"sendVel",linearX:0,linearY:0,linearZ:0,angularZ:angularZ,interval:0});
+            console.log("send: angularZ = 1");
+         }else{
+            postMessage({com:"sendVel",linearX:0,linearY:0,linearZ:0,angularZ:0,interval:0});
+            console.log("send: angularZ = 0");
+            origen = pose3d;
+            giro++;
+            step++;
+         }
+         break;
+      case 6:
+         console.log(-Math.PI/2);
+         console.log(pose3d.yaw);
+         if (-Math.PI/2>pose3d.yaw){
+            angularZ = 0.1;
+            postMessage({com:"sendVel",linearX:0,linearY:0,linearZ:0,angularZ:angularZ,interval:0});
+            console.log("send: angularZ = 1");
+         }else{
+            postMessage({com:"sendVel",linearX:0,linearY:0,linearZ:0,angularZ:0,interval:0});
+            console.log("send: angularZ = 0");
+            origen = pose3d;
+            giro++;
+            step++;
+         }
+         break;
+      case 8:
+         postMessage({com:"land",interval:2});
+         break;
+      default:
+         
+   }
+   //postMessage({linearX:linearX,linearY:linearY,linearZ:linearZ,angularZ:angularZ,interval:0});
+}
+\end{lstlisting}
+
+El experimento tuvo un resultado satisfactorio como se muestra en las imágenes \ref{fig:introrobuav_exp}.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/introrobuav_exp1.png}
+\caption{Imagen del experimento}
+\label{fig:introrobuav_exp}
+\end{figure}
+
+
+\section{Rendimiento Temporal}
+
+Además de verificar el correcto funcionamiento de todas las herramientas desarrolladas, 
+este experimento consiste en una comparación del cliente \texttt{CameraViewJS} desarrollado frente al \texttt{CameraView} ya existente. 
+Sólo se ha considerado este cliente porque el vídeo es el que tiene una mayor tasa de refresco, y por lo tanto, es el que será más sensible a restricciones de ancho
+de banda. 
+
+Se han definido dos localizaciones con distintas conexiones a
+Internet y distintos anchos de banda. Las características de dichas conexiones han sido
+medidas con la herramienta web \textit{Speed Test} \footnote{\url{http://www.speedtest.net/es/}}.
+
+\begin{itemize}
+ \item \textbf{Universidad (URJC)}: La primera localización es el campus de Fuenlabrada de la Universidad
+Rey Juan Carlos. La universidad dispone de una conexión con un ancho de banda
+que supera los 100 Mbps característicos de la tecnología Fast Ethernet, por lo que
+tomaremos ese valor de 100 Mbps como el ancho de banda disponible para las pruebas.
+
+\item \textbf{Domicilio (Casa)}: La segunda localización es un domicilio particular con una conexión de
+fibra óptica. Es una conexión asimétrica con un ancho de banda de 5 Mbps de subida
+y 50 Mbps de bajada.
+\end{itemize}
+
+Los equipos usados para las pruebas y su función dentro del sistema son los mismos que en los experimentos con \texttt{CameraViewJS}. La única excepción es que el 
+portátil ejecuta tanto \texttt{CameraViewJS} como \texttt{cameraview} de C++.
+En las pruebas se va a medir los fotogramas por segundo del \textit{streaming} de
+vídeo.
+
+Se puede comprobar que los clientes funcionan bien en situaciones reales. La principal restricción que tiene es el ancho de banda de subida de \texttt{cameraserver} 
+y en general de todos los servidores ya que las imágenes se envían sin comprimir y necesitan mucho ancho. La tabla \ref{tab:exptable} muestra un resumen de los resultados de las pruebas
+
+
+%\begin{landscape}
+ \begin{table}[]
+\centering
+\label{tab:exptable}
+{\scriptsize
+\begin{tabular}{|
+>{\columncolor[HTML]{67FD9A}}c |
+>{\columncolor[HTML]{9AFF99}}c |
+>{\columncolor[HTML]{34CDF9}}c |
+>{\columncolor[HTML]{38FFF8}}c |
+>{\columncolor[HTML]{96FFFB}}c |
+>{\columncolor[HTML]{FFCE93}}c |
+>{\columncolor[HTML]{FFFC9E}}c |}
+\hline
+\multicolumn{2}{|c|}{\cellcolor[HTML]{32CB00}\textbf{Cameraserver}}                                                          & \multicolumn{3}{c|}{\cellcolor[HTML]{3166FF}\textbf{Clientes}}                                                                              & \cellcolor[HTML]{FFCE93}                                                                                    & \cellcolor[HTML]{FFFFC7}                                                                                      \\ \cline{1-5}
+\textbf{Ubicación}                                   & \textbf{\begin{tabular}[c]{@{}c@{}}Mbps\\ bajada/subida\end{tabular}} & \textbf{Tipo} & \textbf{Ubicación}                                  & \textbf{\begin{tabular}[c]{@{}c@{}}Mbps\\ bajada/subida\end{tabular}} & \multirow{-2}{*}{\cellcolor[HTML]{FFCE93}\textbf{\begin{tabular}[c]{@{}c@{}}FPS\\ cameraView\end{tabular}}} & \multirow{-2}{*}{\cellcolor[HTML]{FFFFC7}\textbf{\begin{tabular}[c]{@{}c@{}}FPS\\ CameraViewJS\end{tabular}}} \\ \hline
+\begin{tabular}[c]{@{}c@{}}Mismo\\ PC\end{tabular}   & -                                                                     & PC            & \begin{tabular}[c]{@{}c@{}}Mismo\\ PC\end{tabular}  & -                                                                     & 9                                                                                                           & 8                                                                                                             \\ \hline
+\begin{tabular}[c]{@{}c@{}}Red\\ Local\end{tabular}  & 1000/1000                                                             & PC            & \begin{tabular}[c]{@{}c@{}}Red\\ Local\end{tabular} & 65/65                                                                 & 6                                                                                                           & 4                                                                                                             \\ \hline
+\begin{tabular}[c]{@{}c@{}}Red\\ Local\end{tabular}  & 1000/1000                                                             & Móvil         & \begin{tabular}[c]{@{}c@{}}Red\\ Local\end{tabular} & 65/65                                                                 & -                                                                                                           & 4                                                                                                             \\ \hline
+Casa                                                 & 50/5                                                                  & PC            & URJC                                                & 15/15                                                                 & 1                                                                                                           & 1                                                                                                             \\ \hline
+Casa                                                 & 50/5                                                                  & Móvil         & 3G                                                  & 5/1                                                                   & -                                                                                                           & 1                                                                                                             \\ \hline
+Casa                                                 & 50/5                                                                  & Móvil         & 4G                                                  & 13/4                                                                  & -                                                                                                           & 1                                                                                                             \\ \hline
+URJC                                                 & 100/100                                                               & PC            & Casa                                                & 50/5                                                                  & 6                                                                                                           & 4                                                                                                             \\ \hline
+URJC                                                 & 100/100                                                               & Móvil         & 3G                                                  & 5/1                                                                   & -                                                                                                           & 2                                                                                                             \\ \hline
+URJC                                                 & 100/100                                                               & Móvil         & 4G                                                  & 13/4                                                                  & -                                                                                                           & 4                                                                                                           \\ \hline
+\end{tabular}
+}
+\caption{Resultados de las pruebas}
+\end{table}
+	
+%\end{landscape}
+
+
+\subsection{Todos los elementos dentro de una red local}
+
+La primera prueba se realiza en una subred local. Todas las máquinas se conectan entre
+sí usando un \textit{router Wifi}. En esta subred el servidor se conecta al \textit{router} mediante red cableada Gigabit Ethernet 
+y los clientes mediante \textit{wifi N} con un ancho de banda de 65Mbps.
+Con esta primera prueba se pretende medir las prestaciones del sistema en un entorno
+ideal con conexiones de alto ancho de banda y sin latencia apreciable. La figura \ref{fig:red_local}
+representa un esquema del montaje realizado.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/red_local.png}
+\caption{Montaje de todos los equipos en la misma red local} \label{fig:red_local}
+\end{figure}
+
+El resultado obtenido en esta prueba es un \textit{streaming} con una tasa de refresco de imagen
+de alrededor de 6 fotogramas por segundo para \texttt{cameraview} y 4 fotogramas por segundo para \texttt{CameraViewJS} 
+tanto en el portátil como en el móvil. Esto demuestra que el cliente funciona igual tanto en un móvil como en un PC. Además, si los comparamos con los resultados en el mismo PC 
+se nota un descenso lógico de FPS ya que ahora hay más distancia entre cliente y servidor.
+
+\subsection{Servidor en el domicilio y los clientes en otras redes}
+
+La segunda prueba se realiza estando cada máquina en una red diferente. El servidor se encuentra en el domicilio con 
+una conexión a Internet de fibra óptica asimétrica de 50Mbps de bajada y 5Mbps de subida, el cliente 1 se encuentra en la 
+universidad con velocidades de acceso de 15Mbps de subida y 15Mbps de bajada y por último el cliente 2 se conecta mediante 3G (5Mbps/1Mbps) y 4G(13Mbps/4Mbps). La figura \ref{fig:red_casa}
+representa un esquema del montaje realizado.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/red_casa.png}
+\caption{Montaje del servidor en casa y los clientes en otras redes} \label{fig:red_casa}
+\end{figure}
+
+El resultado obtenido en esta prueba es un \textit{streaming} con una tasa de refresco de imagen
+de alrededor de 1 fotograma por segundo para \texttt{cameraview} y 1 fotograma por segundo para \texttt{CameraViewJS} 
+en el portátil y de 1 fps en el móvil tanto en 3G como en 4G. En este caso que todos los clientes funcionen a 1 FPS demuestra que la velocidad de subida de la casa limita la conexión del servidor.
+
+\subsection{Servidor en la universidad y los clientes en otras redes}
+
+La tercera prueba se realiza estando cada máquina en una red diferente. El servidor se encuentra en la universidad con velocidades de acceso de 100Mbps de subida y 100Mbps de bajada, 
+el cliente 1 se encuentra en el domicilio con una conexión a Internet de fibra óptica asimétrica de 50Mbps de bajada y 5Mbps de subida 
+y por último el cliente 2 se conecta mediante 3G (5Mbps/1Mbps) y 4G(13Mbps/4Mbps). La figura \ref{fig:red_uni}
+representa un esquema del montaje realizado.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/red_uni.png}
+\caption{Montaje del servidor en la universidad y los clientes en otras redes} \label{fig:red_uni}
+\end{figure}
+
+El resultado obtenido en esta prueba es un \textit{streaming} con una tasa de refresco de imagen
+de alrededor de 6 fotogramas por segundo para \texttt{cameraview} y 4 fotogramas por segundo para \texttt{CameraViewJS} 
+en el portátil y de 4 fps en el móvil con 4G y 2 con 3G. de esta última prueba se pueden sacar dos conclusiones, la primera es que la conexión entre cliente y servidor por lo menos necesita 
+10Mbps para conseguir un funcionamiento razonable. La segunda es que el \textit{hardware} usado ha limitado las pruebas porque no se han notado mejoría de FPS desde los 10Mbps hasta los 100Mbps 
+de la red local, por lo que se les puede achacar tanto a los clientes como al servidor. 

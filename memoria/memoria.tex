@@ -1,0 +1,224 @@
+\documentclass[oneside,a4paper,12pt]{book}
+
+\usepackage[spanish]{babel}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{a4wide}
+\usepackage{html}
+\usepackage{hthtml}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{lscape}
+
+\usepackage[latin1]{inputenc}
+\usepackage{geometry}
+\usepackage{named}
+\usepackage[normalsize]{subfigure}
+\usepackage{color}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{amsmath}
+
+
+
+%\usepackage{sectsty}
+%\allsectionsfont{\sffamily}
+%\usepackage[Bjarne]{fncychap}
+%\ChNameVar{\sffamily \raggedleft\normalsize}
+%\ChNumVar{\sffamily \raggedleft \bfseries\Large}
+%\ChTitleVar{\sffamily \raggedleft \bfseries \Large}
+
+\pretolerance=10000
+%Para que no corte las palabras al final de la linea.
+
+\DeclareGraphicsExtensions{.png,.jpg,.pdf,.eps}
+\usepackage{geometry}
+\geometry{a4paper, left=2.6cm, right=2.2cm, top=3.0cm, bottom=3.0cm}
+
+\linespread{1.3}
+
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+
+%\author{Roberto Calvo Palomino\\
+% (rocapal@gsyc.escet.urjc.es)}
+%\title{Comportamiento sigue persona con visin direccional}
+%\date{Version 0.1}
+
+%listings style
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\definecolor{lightgray}{rgb}{.9,.9,.9}
+\definecolor{darkgray}{rgb}{.4,.4,.4}
+\definecolor{purple}{rgb}{0.65, 0.12, 0.82}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\ttfamily\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  %keywordstyle=\color{blue},       % keyword style
+  language=Ruby,                 % the language of the code
+  %morekeywords={*,int,void,interface,import,as,before_action,...},            % if you want to add more keywords to the set
+  %numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  %numbersep=5pt,                   % how far the line-numbers are from the code
+  %numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\ttfamily\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  %Scommentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  %keywordstyle=\color{blue},       % keyword style
+  language=JavaScript,                 % the language of the code
+  %morekeywords={*,int,void,interface,import,as,before_action,...},            % if you want to add more keywords to the set
+  %numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  %numbersep=5pt,                   % how far the line-numbers are from the code
+  %numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\lstset{
+  language=html, 
+  morekeywords={header, nav, canvas}
+}
+
+\begin{document}
+
+
+\include{portada}
+\newpage
+$\ $
+\thispagestyle{empty} % para que no se numere esta pagina
+
+%\include{copyright}
+
+\clearpage
+\thispagestyle{empty}
+
+\vspace{5cm}
+\makebox[15cm][r]{
+\begin{tabular}{ll}
+&\emph{A mis padres y hermano,}\\
+&\emph{que siempre han estado a mi lado,}\\
+&\emph{y siempre lo estarán.}\\
+&\\
+&\emph{A Laura, que siempre}\\
+&\emph{está a mi lado apoyándome.}\\
+&\\
+&\emph{Y a mis amigos, por ser }\\
+&\emph{verdaderamente mis amigos.}\\
+&\\
+&\emph{Gracias.}
+\\
+\end{tabular}
+}
+
+
+\newpage
+$\ $
+\thispagestyle{empty} % para que no se numere esta pagina
+%\include{agradecimientos}
+%\include{resumen}
+
+% Para que salga la bibliografia en el indice
+
+\let\OLDthebibliography=\thebibliography
+\def\thebibliography#1{\OLDthebibliography{#1}%
+  \addcontentsline{toc}{chapter}{\bibname}}
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\include{1-introduccion}
+\include{2-objetivos}
+\include{3-plataforma}
+\include{4-diseno}
+\include{5-experimentos}
+\include{6-conclusiones}
+%\include{apendice}
+
+\nocite{*}
+
+%\bibliographystyle{named}
+%\bibliography{bibliografia}
+\begin{thebibliography}{99}
+\bibitem{jderobot} Proyecto JdeRobot \url{http://jderobot.org/} 
+\bibitem{jderobot_repo} Repositorio de JdeRobot \url{https://github.com/RoboticsURJC/JdeRobot} 
+\bibitem{cameraserver} Componente CameraServer JdeRobot  \url{http://jderobot.org/index.php/Drivers#cameraserver} 
+\bibitem{openni1server} Componente Openni1Server JdeRobot  \url{http://jderobot.org/index.php/Drivers#OpenniServer}
+\bibitem{gstreamer} Página oficial GStreamer \url{http://gstreamer.freedesktop.org/}
+\bibitem{gazeboserver} Componente GazeboServer JdeRobot  \url{http://jderobot.org/index.php/Drivers#gazeboserver}
+\bibitem{ardrone_server} Componente Ardrone\_server JdeRobot \url{http://jderobot.org/index.php/Drivers#ardrone_server}
+\bibitem{kobuki_driver} Componente Kobuki\_driver JdeRobot \url{http://jderobot.org/index.php/Drivers#kobuki_driver}
+\bibitem{gazebo} Página oficial Gazebo \url{http://gazebosim.org/}
+\bibitem{html5} Curso de HTML5 de W3C \url{http://www.w3schools.com/html/html5_intro.asp}
+\bibitem{js5} Curso de JavaScript de W3C \url{http://www.w3schools.com/js/default.asp}
+\bibitem{js5moz} Guía de JavaScript de Mozilla \url{https://developer.mozilla.org/es/docs/Web/JavaScript/Guide}
+\bibitem{css3} Curso de CSS3 de W3C \url{http://www.w3schools.com/css/css3_intro.asp}
+\bibitem{webgl} Página oficial WebGL \url{http://get.webgl.org/}  
+\bibitem{TFGsurveillance4.0} Daniel Castellano. Sistema domótico distribuido, inalámbrico, interoperable y opensource. Proyecto Fin de Carrera, Carrera Superior de Ingeniería de la telecomunicación, Universidad Rey Juan Carlos, 2012-2013. 
+\bibitem{surveillance4.0} Mediawiki Daniel Castellano (Surveillance 4.0) \url{http://jderobot.org/D.castellanob-pfc} 
+\bibitem{TFGsurveillance5.1} Edgar Barrero. Desarrollo de una aplicación web para sistema domótico. Trabajo Fin de Grado, Grado en Ingeniería de Sistemas Audiovisuales y Multimedia, Universidad Rey Juan Carlos, 2013-2014.
+\bibitem{surveillance5.1} Mediawiki Edgar Barrero (Surveillance 5.1) \url{http://jderobot.org/Aerobeat-colab}
+\bibitem{Mediawiki} Mediawiki Aitor Martínez (JdeRobot Web Clients) \url{http://jderobot.org/Aitormf-tfg} 
+\bibitem{Repositorio} Repositorio de Aitor Martínez (JdeRobot Web Clients) \url{https://svn.jderobot.org/users/aitormf/tfg/} 
+\bibitem{ice} Página oficial ICE  \url{http://www.zeroc.com/}
+\bibitem{ice_manual}Ice 3.5.1 Documentation  \url{https://doc.zeroc.com/display/Ice35/Home}
+\bibitem{slicecomp} Uso de los compiladores de Slice \url{https://doc.zeroc.com/display/Ice36/Using+the+Slice+Compilers}
+\bibitem{icejs} Página de Ice for JavaScript  \url{https://zeroc.com/labs/icejs/index.html}
+\bibitem{icews} Websockets en ICE \url{https://zeroc.com/labs/icejs/websocket.html}
+\bibitem{threejs} Página de Three.js \url{http://threejs.org/}
+\bibitem{threejs_doc} Documentación de Three.js \url{http://mrdoob.github.io/three.js/docs/}
+\bibitem{threejs_curso} Curso para aprender Three.js \url{http://stemkoski.github.io/Three.js/}
+\bibitem{jquery} Página de JQuery \url{https://jquery.com/}
+\bibitem{bootstrap} Página de Bootstrap \url{http://getbootstrap.com/}
+\end{thebibliography} 
+
+\end{document}

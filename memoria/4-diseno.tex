@@ -1,0 +1,1544 @@
+\chapter{Diseño y programación}
+\label{ch:Diseno}
+
+Una vez explicados en los capítulos anteriores los requisitos
+y las herramientas necesarias para la elaboración del proyecto, 
+en este capítulo se va a explicar la solución desarrollada al problema planteado en el capítulo objetivos. 
+Se va a comenzar dando una visión general del
+diseño y posteriormente se describirán sus detalles y la
+implementación de cada una de sus partes.
+
+\section{Diseño global} \label{sec:diseno-global}
+ 
+El diseño que se presenta se ha elegido porque cumple todos los objetivos
+y requisitos expuestos en el capítulo 2. La arquitectura del sistema tiene dos partes
+diferenciadas tal y como se observa en la figura \ref{fig:JdeRobotwebclients}: Servidores y clientes.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.9\textwidth]{../traspas/img/esq_proyecto.png}
+\caption{Arquitectura de JdeRobotWebClients} \label{fig:JdeRobotwebclients}
+\end{figure}
+
+ \textbf{Servidores}. Se han utilizado 4 servidores distintos, dos de sensores (el de cámara y el de Kinect) y dos de robots (Kobuki y Drone). 
+ %el de Kinect (\texttt{Openni1Server}) y dos de robots completos, el de robots kobuki (\texttt{kobuki_driver})y el de un Drone (\texttt{ardrone_server}), 
+ Estos dos últimos pueden ser reales o simulados mediante Gazebo.
+ Cada uno de los servidores se corresponde con componentes de JdeRobot ya existentes a los que se les ha añadido en la configuración la ubicación de un \textit{plugin} 
+ para que puedan usar el protocolo \texttt{WebSockect}, necesario 
+ para que los navegadores web puedan comunicarse con estos servidores. Este \textit{plugin} viene con la instalación de Ice-JS. 
+ Además, todos los componentes involucrados usan una interfaz ICE para comunicarse y transmitir esos datos al servidor Web o a otros componentes. Esto 
+ hace que cada componente pueda correr en una máquina distinta.
+ 
+ Los \textbf{clientes} están desarrollados mediante JavaScript, HTML y CSS. Para dotarlos de la mayor flexibilidad posible constan de 3 partes muy diferenciadas, 
+ como puede verse en la figura \ref{fig:nivelesweb}: conexión con servidor, núcleo e interfaz gráfico.
+ \begin{enumerate}
+ \item Conector. Está desarrollado íntegramente en JavaScript. Se encarga de la comunicación con el servidor de sensores o de robots. Permite crear la conexión y recibir los datos. Para ello primero crea un hilo separado 
+ que es el que se conecta con el servidor ICE. Una vez creada la conexión, el hilo principal mediante RPC's indica a este segundo hilo los métodos que debe ejecutar del servidor. Un cliente tiene tantos 
+ conectores como interfaces ICE tenga el servidor. Para comunicarse con dicho servidor utilizan ICE-JS que está escrito en JavaScript y permite utilizar interfaces ICE sobre el protocolo \texttt{WebSockect}.
+ \item Núcleo. Esta parte está desarrollada íntegramente en JavaScript. Se encarga del funcionamiento interno de cada uno de los \textit{widgets} del cliente, ya sea mostrar los datos recibidos de los sensores
+ o mandar los datos a los actuadores.
+ \item Interfaz gráfico. Engloba la parte HTML y CSS y algo de JavaScript de los clientes e indica cómo se organizan cada uno de los \textit{widgets} del cliente dentro de la página web.
+ \end{enumerate}
+ 
+
+ \begin{figure}[htb]
+\centering
+\includegraphics[width=0.4\textwidth]{./img/niveles_web.png}
+\caption{Niveles de los clientes} \label{fig:nivelesweb}
+\end{figure}
+
+En total son 6 clientes: \texttt{CameraViewJS} (1), que recibe datos de \textit{CameraServer}; \texttt{RgbdViewerJS} (2), que recibe datos de \texttt{Openni1Server}; 
+\texttt{KobukiViewerJS} (3), que permite teleoperar robots Kobuki; \texttt{UavViewerJS} (4), que permite teleoperar drones y los dos que además de teleoperar dan soporte para crear 
+comportamiento autónomo en los robots o drones, \texttt{IntrorobKobukiJS} (5) e \texttt{IntrorobUavJS} (6).
+
+Adicionalmente, hemos creado una página web, a modo de envoltorio único, que empotra en pestañas los seis clientes desarrollados.
+
+
+\subsection{Servidores} \label{sec:servidores}
+En esta sección se describe el funcionamiento de los componentes de JdeRobot ya existentes usados en este TFG. Su funcionamiento general se ha detallado
+en la sección \ref{sec:plat_jderobot}.
+\texttt{Cameraserver} \cite {cameraserver} es el componente encargado de acceder a la cámara web
+para entregar vía ICE las imágenes necesarias para \textit{streaming} de vídeo.
+\texttt{Openni1Server} \cite {openni1server} es el componente necesario para acceder al sensor
+Kinect. De este componente se obtienen las imágenes de profundidad. 
+\texttt{Ardrone\_server} \cite {ardrone_server} es el componente necesario para acceder al drone. 
+Hace de intermediario entre el drone y el cliente.
+\texttt{Kobuki\_driver} \cite {kobuki_driver} es el componente necesario para acceder al Kobuki. 
+Hace de intermediario entre el Kobuki y el cliente.
+
+Se ha tenido que hacer variaciones en sus ficheros de configuración para permitirles usar el protocolo \textit{websocket} ya que es el único 
+que usan los Navegadores web. Para ello hay que indicarle en la configuración que use el \textit{plugin} mediante la siguiente línea (No hace falta recompilar el código fuente del propio servidor):
+\lstset{language=Ruby}
+\begin{lstlisting}
+    # Ice-JS
+    Ice.Plugin.IceWS=IceWS:createIceWS
+\end{lstlisting}
+
+Una vez hecho esto ya se le puede indicar que escuche en un puerto mediante el protocolo \textit{WebSokect} (ws) añadiendo al \textit{endpoint}:
+\begin{lstlisting}
+    # Ice-JS
+    :ws -h IP -p PUERTO
+\end{lstlisting}
+
+Por ejemplo, el fichero de configuración de \texttt{cameraserver} quedaría así:
+\begin{lstlisting}
+# client/server mode
+# rpc=1 ; request=0
+CameraSrv.DefaultMode=1
+CameraSrv.TopicManager=IceStorm/TopicManager:default -t 5000 -p 10000
+
+#General Config
+CameraSrv.Endpoints=default -h 0.0.0.0 -p 9999:ws -h 0.0.0.0 -p 11000
+CameraSrv.NCameras=1
+CameraSrv.Camera.0.Name=cameraA
+#0 corresponds to /dev/video0, 1 to /dev/video1, and so on...
+CameraSrv.Camera.0.Uri=0
+CameraSrv.Camera.0.FramerateN=25
+CameraSrv.Camera.0.FramerateD=1
+CameraSrv.Camera.0.Format=RGB8
+CameraSrv.Camera.0.ImageWidth=640
+CameraSrv.Camera.0.ImageHeight=480
+
+# Ice-JS
+Ice.Plugin.IceWS=IceWS:createIceWS
+
+# If you want a mirror image, set to 1
+CameraSrv.Camera.0.Mirror=1
+\end{lstlisting}
+
+
+\subsection{Clientes} \label{sec:clientes}
+
+Son los encargados de manejar el contenido de cada \textit{widget} de la página web.
+
+A la hora de crearlos, reciben una variable \texttt{config} que debe incluir todos los datos necesarios para su creación (identificador de los \textit{widgets}, servidor y \textit{endpoint} de cada conector usado,...).
+
+Tienen todos los mismos métodos: \texttt{start}, \texttt{stop}, \texttt{restart}, \texttt{setConfig} e \texttt{isRunning}.
+El funcionamiento de todos los clientes es el mismo: primero se crea el cliente, después se inicia con \texttt{start}, en este momento se comprueban las variables de configuración 
+(en caso de ocurrir algún problema se da un aviso y no se inicia el cliente), se crea el contenido de los \textit{widgets}, se crean los conectores y se inician. Para detener el cliente se usa \texttt{stop} y en caso 
+de querer cambiar algún parámetro de la configuración se usa \texttt{setConfig}. Si el cliente está funcionando en este momento hay que reiniciarlo con \texttt{restart}. \texttt{isRunning} devuelve un booleano indicando si
+el cliente está funcionando o no.
+
+Una vez presentado el diseño global del sistema detallaremos en las siguientes secciones cada uno de los clientes desarrollados.
+\section{CameraViewJS}
+Este cliente se conecta con un servidor de WebCam, por ejemplo CameraServer, y muestra en un \texttt{Canvas} de HTML5 la imagen y los fotogramas 
+por segundo (FPS) en el nodo HTML que se le indique (figura \ref{fig:cameraviewjs}).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{../traspas/img/esq_cameraviewjs.png}
+\caption{Arquitectura de CameraViewJS} \label{fig:cameraviewjs}
+\end{figure}
+
+La variable \texttt{config} para crearlo contiene:
+\begin{itemize}
+ \item \emph{serv:} dirección y puerto del servidor (dir:address, port:port).
+ \item \emph{camepname:} \textit{endpoint} del servidor, por defecto ``cameraA''.
+ \item \emph{camid:} id del canvas que muestra la imagen.
+ \item \emph{fpsid:} id del elemento donde se pone el FPS.
+\end{itemize}
+
+\subsection{Conector}
+El único conector que utiliza \texttt{CameraViewJS} es \textbf{API.Camera}:
+
+Al igual que todos los conectores para sensores, su funcionamiento es el siguiente (detallado en la figura \ref{fig:mensajes_camera}): 
+En el momento de crear el objeto se establecen las variables de configuración y se crea el \textit{\textit{WebWorker}}. 
+Mediante la función \texttt{connect} se establece una promesa que se resuelve una vez esté establecida la conexión con el servidor.
+Para ello se manda un mensaje al \textit{\textit{WebWorker}} indicando que se conecte y éste a su vez comienza la conexión con el servidor. 
+Una vez establecida se envía al hilo principal un mensaje indicando que está establecida y éste resuelve la promesa. 
+\lstset{language=JavaScript}
+\begin{lstlisting}
+    this.connect = function (){
+      this.conPromise = new Promise(
+        // The resolver function is called with the ability to resolve or
+        // reject the promise
+        function(resolve, reject) {
+            self.w.onmessage = function(mes){
+               if (mes.data){
+                  self.isRunning = true;
+                  resolve();
+               }else{
+                  self.isRunning = false;
+                  reject();
+               }
+            };
+            self.w.postMessage({func:"connect",serv:self.server,epname: self.epname}); 
+        });
+     
+   };
+\end{lstlisting}
+
+Todas las funciones que se ejecuten, ya sea pidiendo o enviando datos se quedan paradas esperando a que se resuelva y una vez hecho se ejecutan con normalidad. 
+\begin{lstlisting}
+    this.getImage = function(){
+      this.conPromise.then(
+        function() {
+            self.w.onmessage = self.onmessage || self.onmessageDefault;
+            self.w.postMessage({func:"getImage", imgFormat: self.imgFormat});
+        }); 
+      
+   };
+\end{lstlisting}
+En el caso de los sensores se puede iniciar un \textit{streaming} que consiste en darle la orden al \textit{WebWorker} y éste se dedica a hacer peticiones 
+al servidor una tras otra y a devolver el resultado al hilo principal hasta que se le indique que pare.
+\begin{lstlisting}
+    this.startStreaming = function(){
+      this.conPromise.then(
+        function() {
+            self.w.onmessage = self.onmessage || self.onmessageDefault;
+            self.w.postMessage({func:"startImageStream", imgFormat: self.imgFormat});
+            self.toError=setTimeout(self.conErr, self.timeoutE);
+        }); 
+   };
+   
+   this.stopStreaming = function(){
+      this.conPromise.then(
+        function() {
+            self.w.postMessage({func:"stopImageStream"});
+            if(self.toError){
+               clearTimeout(self.toError);
+               toError=undefined;
+            }
+        }); 
+   };
+\end{lstlisting}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=1\textwidth]{./img/mensajes_cameraview.png}
+\caption{Mensajes API.Camera.} \label{fig:mensajes_camera}
+\end{figure}
+
+Hablando ya en concreto de \texttt{API.Camera}, permite conectar con la interfaz Camera de JdeRobot. El contenido de \texttt{config} es el siguiente:
+\begin{itemize}
+ \item \emph{server:} dirección y puerto del servidor (dir:address, port:port).
+ \item \emph{epname:} \textit{endpoint} del servidor, por defecto ``cameraA''.
+ \item \emph{imgFormat:} formato de imagen que se va a pedir al servidor, por defecto ``RGB8''.
+\end{itemize}
+
+El contenido de la variable \texttt{data} (datos recibidos de la cámara) es el siguiente:
+\begin{itemize}
+ \item \emph{width:} Ancho en píxeles de la imagen recibida.
+ \item \emph{height:} Alto en píxeles de la imagen recibida.
+ \item \emph{imgData:} Imagen preparada para ser mostrada en un \texttt{canvas} de HTML5.
+ \item \emph{pixelData:} Imagen recibida desde el servidor.
+ \item \emph{fps:} fotogramas por segundo recibidos.
+\end{itemize}
+
+y su lista de métodos es:
+
+\begin{itemize}
+ \item \emph{createWork:} Crea el \textit{\textit{WebWorker}} (se ejecuta cuando se crea el conector).
+ \item \emph{deleteWork:} Elimina el \textit{\textit{WebWorker}}.
+ \item \emph{connect:} Inicia la conexión con el servidor.
+ \item \emph{disconnect:} Desconecta del servidor.
+ \item \emph{getImage:} Pide una imagen al servidor.
+ \item \emph{startStreaming:} Activa el \textit{streaming} de imágenes (es como ejecutar \texttt{getImage} constantemente).
+ \item \emph{stopStreaming:} Detiene el \textit{streaming} de imágenes.
+ \item \emph{getDescription:} Pide la descripción de la cámara al servidor y la almacena en la variable \texttt{description}.
+\end{itemize}
+
+\subsection{Núcleo}
+Cuando se inicia el cliente \textbf{CameraViewJS}, éste inicia un \textit{streaming} en el \texttt{API.Camera}. Cada vez que se recibe la imagen, 
+crea un \texttt{canvas} nuevo donde poner la imagen de la cámara recibida, después lo introduce como si fuera una foto en el \texttt{canvas} dado en la configuración. 
+Esto se hace porque usando un solo \texttt{canvas} si se cambia el tamaño de la página web, por ejemplo, girando la tablet se deforma la imagen recibida de la cámara. 
+Mientras que de esta manera se adapta la imagen al tamaño del \texttt{canvas} externo como si fuera cualquier archivo de imagen. 
+
+%, el \texttt{canvas} externo cambia de tamaño con la web y adapta su contenido a su tamaño, si no se usar un segundo \texttt{canvas}, o no se podría adaptar el tamaño 
+%de la imagen al dispositivo o se tendría que recortar.
+\lstset{language=JavaScript}
+\begin{lstlisting}
+    camera.onmessage = function (event){
+         camera.onmessageDefault(event);
+         var respwork = camera.data;
+         //camera
+         var canvas2 = document.createElement('canvas');
+         var ctx2=canvas2.getContext("2d");       
+         var imgData=ctx2.getImageData(0,0,respwork.width,respwork.height);
+         ctx2.canvas.width=respwork.width;
+         ctx2.canvas.height=respwork.height;
+         var ctx=canvas.getContext("2d");
+         imgData.data.set(respwork.imgData);
+         ctx2.putImageData(imgData,0,0);
+         ctx.drawImage(canvas2, 0, 0,ctx.canvas.width,ctx.canvas.height);
+         
+         //FPS
+         if (respwork.fps){
+            fps.html(Math.floor(respwork.fps));
+         }
+      };
+\end{lstlisting}
+
+\subsection{Interfaz gráfico}
+
+Para la interfaz de los clientes se ha optado por un color oscuro de fondo para reducir el consumo de las pantallas de los dispositivos. Además se usa \textbf{Bootstrap} 
+para todos los elementos, organización y para hacer la web responsiva (se adapta a cualquier dispositivo), como se puede ver en la figura \ref{fig:interfaz_cameraview}.
+
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:interfaz_cameraview1}\includegraphics[width=0.6\textwidth]{./img/interfaz_cameraview1.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:interfaz_cameraview2}\includegraphics[width=0.3\textwidth]{./img/interfaz_cameraview2.png}}
+\caption{Escritorio (a) y Móvil (b)}
+\label{fig:interfaz_cameraview}
+\end{figure}
+
+La interfaz de cada cliente consta de un fichero HTML y varios CSS y JavaScript.
+El \textit{body} de del HTML se divide es 3 partes (figura \ref{fig:jrwc_partes}):
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:jrwc_partes1}\includegraphics[width=0.45\textwidth]{./img/jrwc_partes.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:jrwc_partes2}\includegraphics[width=0.45\textwidth]{./img/jrwc_modal.png}}
+\caption{Header y Body (a) y Modal (b)}
+\label{fig:jrwc_partes}
+\end{figure}
+
+\begin{itemize}
+ \item \textbf{\textit{Header}}: En todos es igual y contiene la cabecera de la página web.
+ \lstset{language=html}
+ \begin{lstlisting}
+<header id="header">
+  <nav class="navbar navbar-inverse" role="banner">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#"><i class="fa fa-bolt"></i> JdeRobot Web Clients</a></a> </div>
+    </div>
+    <!--/.container--> 
+  </nav>
+  <!--/nav--> 
+</header>
+\end{lstlisting}
+
+\item \textbf{\textit{Body}}: es completamente diferente en cada cliente y contiene los \textit{widgets} propios de cada uno. En el caso de \texttt{CameraViewJS} consta de 3 botones (\texttt{start, stop, config}),
+el \texttt{canvas} para mostrar la imagen de la cámara y un cuadro donde se muestran los FPS y el tamaño de la imagen recibida.
+
+ \lstset{language=html}
+ \begin{lstlisting}
+<div id="body" class="container">
+   <div class="row">
+      <div id="buttons" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+         <p>
+            <button id="start" type="button" class="btn btn-md btn-success">Start</button>
+            <button id="stop" type="button" class="btn btn-md btn-danger">Stop</button>
+            <button id="config" type="button" class="btn btn-info" data-toggle="modal" data-target="#configure">Config</button>
+         </p>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4 col-lg-offset-4 col-md-offset-2">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Camera</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="camView" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Information</span>
+            </div>
+            <div class="panel-body border-blue container-fluid">
+               <p><span class="bold">FPS: </span><span id="fps"></span></p>
+               <p><span class="bold">Size: </span><span id="size"></span></p>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+\end{lstlisting}
+
+\item \textbf{\textit{Modal}}: Contiene un formulario para guardar la configuración de cada cliente y la única diferencia entre los clientes es en el número de elementos del formulario.
+
+ \lstset{language=html}
+ \begin{lstlisting}
+<div class="modal fade" id="configure" tabindex="-1" role="dialog" aria-labelledby="configLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content bg-carbon">
+      <div class="modal-header bg-orange">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="configLabel">CameraView Config</h4>
+      </div>
+      <div class="modal-body">
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Dir</span>
+           <input  id="dir" type="text" class="form-control" placeholder="Direction" value="localhost" aria-describedby="basic-addon1">
+         </div>
+         <br>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Port</span>
+            <input  id="port" type="number" class="form-control" value="11000" aria-describedby="basic-addon1">
+         </div>
+         <br>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+            <input id="ep" type="text" class="form-control" value="cameraA" aria-describedby="basic-addon1">
+         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
+        <button id="save" type="button" class="btn btn-success" data-dismiss="modal">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+\end{lstlisting}
+\end{itemize}
+
+Debajo de estos tres grandes bloques ya se sitúan los ficheros JavaScript necesarios para cada cliente Así se agiliza la carga de la web.
+
+\clearpage
+
+\section{RgbdViewerJS}
+Este cliente se conecta con un servidor de \texttt{Openni1Server} y muestra en dos \texttt{Canvas} de HTML5 la imagen RGB y la de distancia. Los fotogramas por segundo (FPS) de cada imagen se muestran en su respectivo nodo HTML, 
+además en un tercer \texttt{canvas} muestra en 3D una escena de la combinación de estas dos imágenes(figura \ref{fig:rgbdviewerjs}). Este último elemento es la gran diferencia respecto al cliente anterior.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{../traspas/img/esq_rgbdviewerjs.png}
+\caption{Arquitectura de RgbdViewerJS} \label{fig:rgbdviewerjs}
+\end{figure}
+
+La variable \texttt{config} para crearlo contiene:
+\begin{itemize}
+ \item \emph{serv:} dirección y puerto del servidor (dir:address, port:port).
+ \item \emph{camepname:} \textit{endpoint} del servidor de RGB, por defecto ``cameraA''.
+ \item \emph{camid:} id del canvas que muestra la imagen RGB.
+ \item \emph{fpscamid:} id del elemento donde se pone el FPS RGB.
+ \item \emph{depepname:} \textit{endpoint} del servidor de distancia, por defecto ``cameraB''.
+ \item \emph{depthid:} id del canvas que muestra la imagen de distancia.
+ \item \emph{fpsdepid:} id del elemento donde se pone el FPS de la camara de distancia.
+ \item \emph{modelid:} id del canvas que muestra la reconstrucción 3D.
+\end{itemize}
+
+Este cliente usa dos \textit{conectores} API.Camera, ya explicados en \texttt{CameraViewJS}. El intercambio de mensajes con el servidor es el mismo que en el cliente anterior.
+
+\subsection{Núcleo}
+
+Cuando se inicia el cliente, éste inicia un \textit{streaming} en los dos \texttt{API.Camera} y se crea el entorno ThreeJS para mostrar la escena. El tratamiento de las imágenes recibidas es el mismo que en 
+\texttt{CameraViewJS} pero añadiendo el procesado necesario para crear la escena 3D (figura \ref{fig:mezcla_imagen}). 
+
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\includegraphics[width=0.8\textwidth]{./img/mezcla_imagenes.png}}
+\subfigure[]{\includegraphics[width=0.8\textwidth]{./img/mezcla_img_texto.png}}
+\caption{Creación de la escena 3D} \label{fig:mezcla_imagen}
+\end{figure}
+
+Para crearla primero hay que crear un \textit{buffer} de puntos con sus respectivas coordenadas 3D, además de otro \textit{buffer} con el 
+color, en formato RGB, que se va a aplicar en cada punto. Para crear el primer \textit{buffer} partimos de la imagen de distancia que sólo nos da valores del eje Z. Aplicando el modelo \textit{Pin Hole}, 
+mostrado en la figura \ref{fig:pinhole}, se ha creado una adaptación de la librería \texttt{Progeo} ya existente en JdeRobot para JavaScript y que permite mediante la aplicación de una matriz de traslación y rotación 
+pasar de los píxeles y el valor Z de cada uno a una coordenada (X,Y,Z) real. Dicha matriz se calcula mediante las coordenadas del Kinect y sus ángulos sobre los ejes con las siguientes fórmulas:
+
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.5\textwidth]{./img/pinhole.png}
+\caption{Modelo de cámara Pin Hole} \label{fig:pinhole}
+\end{figure}
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+      rt[0][0] = Math.cos(this.roll) * Math.cos(this.pitch);
+      rt[0][1] = (-Math.sin(this.roll) * Math.cos(this.yaw) + Math.cos(this.roll) * Math.sin(this.pitch) * Math.sin(this.yaw);
+      rt[0][2] = (Math.sin(this.roll) * Math.sin(this.yaw) + Math.cos(this.roll) * Math.sin(this.pitch) * Math.cos(this.yaw);
+      rt[0][3] = this.position.x;
+      rt[1][0] = Math.sin(this.roll) * Math.cos(this.pitch);
+      rt[1][1] = (Math.cos(this.roll) * Math.cos(this.yaw) + Math.sin(this.roll) * Math.sin(this.pitch) * Math.sin(this.yaw);
+      rt[1][2] = (-Math.cos(this.roll) * Math.sin(this.yaw) + Math.sin(this.roll) * Math.sin(this.pitch) * Math.cos(this.yaw);
+      rt[1][3] = this.position.y;
+      rt[2][0] = Math.sin(this.pitch);
+      rt[2][1] = Math.cos(this.pitch) * Math.sin(this.yaw);
+      rt[2][2] = Math.cos(this.yaw) * Math.cos(this.pitch);
+      rt[2][3] = this.position.z;
+      rt[3][0] = 0;
+      rt[3][1] = 0;
+      rt[3][2] = 0;
+      rt[3][3] = 1;
+\end{lstlisting}
+
+Una vez hecho esto sólo hay que aplicar la Matriz a cada punto y ya se tendría el \textit{buffer} de puntos en 3D, el \textit{buffer} RGB es el valor RGB del píxel en dicha imagen.
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+      p.x = point.x * rt[0][0] + 
+            point.y * rt[0][1] +
+            point.z * rt[0][2] +
+            point.h * rt[0][3];
+   
+      p.y = point.x * rt[1][0] + 
+            point.y * rt[1][1] +
+            point.z * rt[1][2] +
+            point.h * rt[1][3];
+   
+      p.z = - point.x * rt[2][0] + 
+            point.y * rt[2][1] +
+            point.z * rt[2][2] +
+            point.h * rt[2][3];
+   
+      p.h = point.x * rt[3][0] +
+            point.y * rt[3][1] +
+            point.z * rt[3][2] +
+            point.h * rt[3][3];
+\end{lstlisting}
+
+Cuando ya se tienen los dos \textit{buffers} se crea la nube de puntos, se borra la anterior nube y se agrega al modelo 3D la nueva.
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+      //prepare the points and each point color
+      for (var i=0; i<depth.data.length;i+=depth.width*3*SAMPLE){
+         x=-depth.width/2;
+         for (var j=0; j<depth.width*3;j+=3*SAMPLE){
+            z=(depth.data[i+j+1]<<8) + depth.data[i+j+2]);
+            points[a]=x;
+            points[a+1]=y;
+            points[a+2]=z;
+
+            color.setRGB(rgb.data[i+j]/255,rgb.data[i+j+1]/255,rgb.data[i+j+2]/255);
+
+            colors[ a ]     =color.r;
+            colors[ a+ 1 ] =color.g;
+            colors[ a+ 2 ] = color.b;
+            
+            a+=3;
+         
+            x+=(w/depth.width)*SAMPLE;
+         }
+         y+=(h/depth.height)*SAMPLE;
+      }
+      
+      var hpoints = conicProjectionCloudHPoint3D(cloudPoint2CloudHPoint3D(points),tphCamera);
+      var cloudpoint = cloudHPoint3D2CloudPoint(hpoints);
+   
+   
+      //I do the object using the points, its color and a material that shows the color of each point
+      var geometry = new THREE.BufferGeometry();
+      geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(cloudpoint), 3 ) );
+      geometry.addAttribute( 'color', new THREE.BufferAttribute( new Float32Array(colors), 3 ) );
+   
+      var material = new THREE.PointsMaterial( {  vertexColors: THREE.VertexColors} );
+      image= new THREE.Points( geometry, material);
+  
+      if (lastCP){
+         scenegl.remove(lastCP);
+      }
+      scenegl.add(image);
+      lastCP=image;
+      
+      
+      depth.update=false;
+      rgb.update=false;
+
+   }
+\end{lstlisting}
+
+\subsection{Interfaz gráfico}
+
+Cómo ya se comentó en \texttt{CameraViewJS}, el elemento \texttt{header} y el elemento \texttt{modal} vienen a ser iguales con alguna pequeña modificación, 
+por lo que nos centramos ahora en el elemento \texttt{body}.
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\includegraphics[width=0.45\textwidth]{./img/rgdviewer_init.png}}
+\hspace{1cm}
+\subfigure[]{\includegraphics[width=0.45\textwidth]{./img/rgbdviewer_modal.png}}
+\caption{Interfaz (a) y Modal (b)}
+\label{fig:rgbdviewer_interfaz}
+\end{figure}
+
+El \texttt{body} consta de 3 \texttt{canvas} ordenados mediante el sistema \textit{Grid} de Bootstrap, los dos de arriba para las imágenes RGB y de distancia, con un hueco debajo para poner los 
+fotogramas por segundo de cada imagen y el tercero para la escena 3D (figura \ref{fig:rgbd_viewer_body}).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.5\textwidth]{./img/rgbdviewer12.png}
+\caption{Body de RgbdViewerJS} \label{fig:rgbd_viewer_body}
+\end{figure}
+
+\lstset{language=html}
+\begin{lstlisting}
+<div id="body" class="container">
+   <div class="row">
+      <div id="buttons" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><p>
+        <button id="start" type="button" class="btn btn-md btn-success">Start</button>
+        <button id="stop" type="button" class="btn btn-md btn-danger">Stop</button>
+        <button id="config" type="button" class="btn btn-info" data-toggle="modal" data-target="#configure">Config</button>
+      </p>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4 col-lg-offset-2 col-md-offset-1">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Camera RGB</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="camView" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+            <div class="panel-footer border-blue letrero"><span class="bold">FPS: </span><span id="fps"></span></div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Camera Depth</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="camView2" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+            <div class="panel-footer border-blue letrero"><span class="bold">FPS: </span><span id="fps2"></span></div>
+         </div>
+      </div>
+   </div>
+      
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4 col-lg-offset-4 col-md-offset-2">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">3D Model</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="model" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+\end{lstlisting}
+
+Además, en este modelo se puede manejar la cámara de observación de la escena para poder ver la reconstrucción desde distintos puntos de vista (figura \ref{fig:rgbdviewer_modelo3d})
+
+\begin{figure}[!h]
+\centering
+\subfigure[]{\includegraphics[width=0.45\textwidth]{./img/modelo3d1.png}}
+\subfigure[]{\includegraphics[width=0.45\textwidth]{./img/modelo3d2.png}}
+\caption{Visualización con cámaras de observación de frente (a) y a la derecha (b)}
+\label{fig:rgbdviewer_modelo3d}
+\end{figure}
+
+%\clearpage
+\section{KobukiViewerJS}
+Este cliente se conecta con un robot con ruedas, modelo Kobuki, para poderlo teleoperar desde la web. Para ello usa dos \texttt{API.Camera}, un \texttt{API.Laser}, un \texttt{API.Pose3D} y un \texttt{API.Motors} (figura \ref{fig:kobukiviewerjs}).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{../traspas/img/esq_kobukiviewer.png}
+\caption{Arquitectura de KobukiViewerJS} \label{fig:kobukiviewerjs}
+\end{figure}
+
+La variable \texttt{config} para crearlo contiene:
+\begin{itemize}
+ \item \emph{camleftserv:} dirección y puerto del servidor de la cámara izquierda (dir:address, port:port).
+ \item \emph{camleftepname:} \textit{endpoint} del servidor de la cámara izquierda.
+ \item \emph{camleftid:} id del canvas que muestra la imagen de la cámara izquierda.
+ \item \emph{camrightserv:} dirección y puerto del servidor de la cámara derecha (dir:address, port:port).
+ \item \emph{camrightepname:} \textit{endpoint} del servidor de la cámara derecha.
+ \item \emph{camrightid:} id del canvas que muestra la imagen de la cámara derecha.
+ \item \emph{motorserv:} dirección y puerto del servidor de los motores (dir:address, port:port).
+ \item \emph{motorsepname:} \textit{endpoint} del servidor de los motores.
+ \item \emph{controlid:} id del canvas que muestra el control para teleoperar el robot.
+ \item \emph{modelid:} id del canvas que muestra una representación en 3D del robot.
+ \item \emph{stopbtnid:} id del botón que detiene el robot.
+ \item \emph{pose3dserv:} dirección y puerto del servidor de Pose3D(dir:address, port:port).
+ \item \emph{pose3depname:} \textit{endpoint} del servidor de Pose3D.
+ \item \emph{laserserv:} dirección y puerto del servidor del láser(dir:address, port:port).
+ \item \emph{laserepname:} \textit{endpoint} del servidor del láser.
+ \item \emph{laserid:} id del canvas que muestra una representación en 2D del láser.
+\end{itemize}
+
+\subsection{Conectores}
+
+\texttt{KobukiViewerJS} utiliza 4 conectores: \texttt{API.Camera, API.Laser, API.Pose3D y API.Motors}. 
+\texttt{API.Camera} ya está explicado anteriormente, así que vamos a seguir por los demás.
+
+\textbf{API.Laser}, como todo conector con sensores, básicamente funciona igual que API.Camera, pero con las siguientes diferencias:
+
+Permite conectar con la interfaz Laser de JdeRobot. El contenido de \texttt{config} es el siguiente:
+\begin{itemize}
+ \item \emph{server:} dirección y puerto del servidor {(dir:address, port:port)}.
+ \item \emph{epname:} \textit{endpoint} del servidor, por defecto ``Laser''.
+\end{itemize}
+
+El contenido de la variable \texttt{data} es el siguiente:
+\begin{itemize}
+ \item \emph{distanceData:} Array de distancias recibidas del servidor.
+ \item \emph{numLaser:} Número de láseres recibidos del servidor.
+ \item \emph{canv2dData:} Representación de \texttt{distanceData} para ser mostrada en un canvas de HTML5.
+ \item \emph{array3dData:} Representación de \texttt{distanceData} para ser mostrada en el modelo 3D.
+\end{itemize}
+
+y su lista de métodos es:
+
+\begin{itemize}
+ \item \emph{createWork:} Crea el \textit{\textit{WebWorker}} (se ejecuta cuando se crea el conector).
+ \item \emph{deleteWork:} Elimina el \textit{\textit{WebWorker}}.
+ \item \emph{connect:} Inicia la conexión con el servidor.
+ \item \emph{disconnect:} Desconecta del servidor.
+ \item \emph{getLaser:} Pide una medida de láseres al servidor.
+ \item \emph{startStreaming:} Activa el \texttt{Streaming} de \texttt{Laser} (es como ejecutar \texttt{getLaser} constantemente).
+ \item \emph{stopStreaming:} Detiene el \texttt{Streaming} de \texttt{Laser}.
+\end{itemize}
+
+A \textbf{API.Pose3D} le pasa lo mismo que a API.Laser:
+
+Permite conectar con la interfaz Pose3D de JdeRobot. El contenido de \texttt{config} es el siguiente:
+\begin{itemize}
+ \item \emph{server:} dirección y puerto del servidor {(dir:address, port:port)}.
+ \item \emph{epname:} \textit{endpoint} del servidor, por defecto ``Pose3D''.
+\end{itemize}
+
+El contenido de la variable \texttt{data} es el siguiente:
+\begin{itemize}
+ \item \emph{x,y,z:} Coordenadas X,Y,Z que representa la posición del robot en el espacio.
+ \item \emph{q0,q1,q2,q3:} cuaternión que representa la orientación del robot.
+ \item \emph{yaw,pitch,roll:} También representan la orientación pero de manera más cómoda de usar, son en radianes.
+\end{itemize}
+
+y su lista de métodos es:
+
+\begin{itemize}
+ \item \emph{createWork:} Crea el \textit{\textit{WebWorker}} (se ejecuta cuando se crea el conector).
+ \item \emph{deleteWork:} Elimina el \textit{\textit{WebWorker}}.
+ \item \emph{connect:} Inicia la conexión con el servidor.
+ \item \emph{disconnect:} Desconecta del servidor.
+ \item \emph{getPose3D:} Pide un Pose3D al servidor.
+ \item \emph{startStreaming:} Activa el \texttt{Streaming} de Pose3D (es como ejecutar \texttt{getPose3D} constantemente).
+ \item \emph{stopStreaming:} Detiene el \texttt{Streaming} de Pose3D.
+\end{itemize}
+
+El caso de \texttt{API.Motors} ya es algo diferente porque ya no conecta con un sensor, sino con un actuador. La parte de la conexión con el servidor es igual, 
+pero ya el intercambio de mensajes es diferente, porque en este caso se envían datos en vez de recibirlos (figura \ref{fig:mensajes_motors})
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=1\textwidth]{./img/mensajes_motors.png}
+\caption{Mensajes API.Motors} \label{fig:mensajes_motors}
+\end{figure}
+
+\textbf{API.Motors} permite conectar con la interfaz Motors de JdeRobot. El contenido de \texttt{config} es el siguiente:
+\begin{itemize}
+ \item \emph{server:} dirección y puerto del servidor {(dir:address, port:port)}.
+ \item \emph{epname:} \textit{endpoint} del servidor, por defecto ``Motors''.
+\end{itemize}
+
+El contenido de la variable \texttt{data} es el siguiente:
+\begin{itemize}
+ \item \emph{v,w,l:} velocidades recibidas del servidor.
+\end{itemize}
+
+y su lista de métodos es:
+
+\begin{itemize}
+ \item \emph{createWork:} Crea el \textit{\textit{WebWorker}} (se ejecuta cuando se crea el conector).
+ \item \emph{deleteWork:} Elimina el \textit{\textit{WebWorker}}.
+ \item \emph{connect:} Inicia la conexión con el servidor.
+ \item \emph{disconnect:} Desconecta del servidor.
+ \item \emph{getV:} Pide la velocidad V al servidor.
+ \item \emph{getW:} Pide la velocidad W al servidor.
+ \item \emph{getL:} Pide la velocidad L al servidor.
+ \item \emph{setV:} Envía la velocidad V al servidor.
+ \item \emph{setW:} Envía la velocidad W al servidor.
+ \item \emph{setL:} Envía la velocidad L al servidor.
+ \item \emph{setAll:} Envía todas las velocidades al servidor.
+\end{itemize}
+
+
+\subsection{Núcleo}
+Cuando se inicia el cliente \texttt{KobukiViewerJS}, éste inicia un \textit{streaming} de los sensores y se crean el control y la representación 3D. El tratamiento de las imágenes recibidas es el mismo que en \texttt{CameraViewJS}. 
+Para el control se ha creado un pequeño componente que permite dibujar el Joystick en un \texttt{canvas} (figura \ref{fig:control}) y que permite dar comportamiento a las interacciones del ratón sobre éste, permitiendo enviar velocidades los motores.
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+   control = new GUI.Control ({id:self.controlid});
+      
+      control.lastW=0;
+      control.lastV=0;
+      
+      //comportamiento cuando se mueve el Joystick
+      control.onPointerM = function (event){
+         control.onPointerMDefault(event);
+         var distSend = 2;
+         var pos = control.position;
+         
+         if (calcDist(pos.x,control.lastW)>=distSend){
+            motors.setW(pos.x/3);
+            control.lastW = pos.x;
+         }
+         
+         if (calcDist(pos.z,control.lastV)>=distSend){
+            motors.setV(pos.z);
+            control.lastV = pos.z;
+         } 
+      };
+      
+      control.initControl();
+\end{lstlisting}
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:control}\includegraphics[width=0.40\textwidth]{./img/control1.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:kobuki3d}\includegraphics[width=0.40\textwidth]{./img/kobuki3d2.png}}
+\caption{Control (a) y Modelo 3D (b)}
+\label{fig:control_modelo}
+\end{figure}
+
+El botón \texttt{stopBot} coloca el Joystick en el centro y envía velocidades 0 a los motores. Para el modelo 3D (figura \ref{fig:kobuki3d}) se ha creado otro pequeño componente que permite cargar desde modelos \texttt{Collada} 
+tanto los robots Pioneer y Kobuki como un Drone. Se ha hecho porque los modelos de los robots venían por partes y así se facilita su uso, además de porque la carga de cada parte es asíncrona 
+y se necesitaba sincronizarlo todo para poder ejecutar una función al final de la carga del modelo.
+En esta escena de pinta el robot en la posición que indican los sensores.
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+  this.loadPioneer = function (scale,onLoad){
+      this.minYPos = 0.11;
+      this.robot = new THREE.Group();
+      var loaded = 2;
+      this.manager.onLoad = onLoad;
+      var chassisLoader = new THREE.ColladaLoader(self.manager);
+      chassisLoader.options.convertUpAxis = true;
+      chassisLoader.load(
+	        'js/libs/robotloaders/pioneer/chassis.dae',
+	        function ( collada ) {
+       
+		  var obj = collada.scene;
+               
+		  obj.scale.x =obj.scale.y = obj.scale.z = scale;
+		  obj.position.y=(self.minYPos+0.05)*scale;
+		  obj.updateMatrix();
+       
+		  self.robot.add(obj);
+		  loaded--;
+		  if (loaded==0){
+		      onLoad();
+		  }
+	        });
+      
+      var wheelLoader = new THREE.ColladaLoader(self.manager);
+      wheelLoader.options.convertUpAxis = true;
+      wheelLoader.load(
+	        'js/libs/robotloaders/pioneer/wheel.dae',
+	        function ( collada ) {
+       
+		    var obj = collada.scene;
+		    var obj2 = obj.clone();
+
+		    obj.scale.x =obj.scale.y = obj.scale.z = scale;
+		    obj.position.z=-0.17*scale;
+		    obj.position.x=0.1*scale;
+		    obj.position.y=self.minYPos*scale;
+		    obj.updateMatrix();
+		    
+		    obj2.scale.x =obj2.scale.y = obj2.scale.z = scale;
+		    obj2.position.z=0.17*scale;
+		    obj2.position.x=0.1*scale;
+		    obj2.position.y=self.minYPos*scale;
+		    obj2.rotation.y=Math.PI;
+		    obj2.updateMatrix();
+	    
+		    self.robot.add(obj);
+		    self.robot.add(obj2);
+		    loaded--;
+		    if (loaded==0){
+			onLoad();
+		    }
+	        });
+\end{lstlisting}
+
+Una vez creado todo el modelo se inician los dos sensores que van a interactuar con éste, como son el Pose3D, que cada vez que se reciben datos cambia la posición y la orientación del robot en el modelo, y el láser 
+que además de representar en un \texttt{canvas} sus datos en 2D, se añaden al modelo en 3D (figura \ref{fig:laser}). 
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+  loader.loadKobuki(1,function () {
+               model.robot=loader.robot;
+               model.scene.add( model.robot );
+         
+               pose3d = new API.Pose3D({server:self.pose3dserv,epname:self.pose3depname});
+               pose3d.onmessage= function (event){
+                  pose3d.onmessageDefault(event);
+                  model.robot.position.set(pose3d.data.x/1000,pose3d.data.z/1000,-pose3d.data.y/1000);
+                  model.robot.rotation.y=(pose3d.data.yaw);
+                  model.robot.updateMatrix();
+                  model.renderer.render(model.scene,model.camera);
+               };
+         
+               pose3d.timeoutE=timeout;
+         
+               pose3d.connect();
+               pose3d.startStreaming();
+         
+               laser= new API.Laser({server:self.laserserv,epname:self.laserepname,canv2dWidth:lasercanv.width,scale3d:0.001,convertUpAxis:true});
+               laser.onmessage= function (event){
+                  laser.onmessageDefault(event);
+                  //2D
+                  var dist = laser.data.canv2dData;
+                  var ctx = lasercanv.getContext("2d");
+                  ctx.beginPath();
+                  ctx.clearRect(0,0,lasercanv.width,lasercanv.height);
+                  ctx.fillRect(0,0,lasercanv.width,lasercanv.height);
+                  ctx.strokeStyle="white";
+                  ctx.moveTo(dist[0], dist[1]);
+                  for (var i = 2;i<dist.length; i = i+2 ){
+                     ctx.lineTo(dist[i], dist[i+1]);
+                  }   
+                  ctx.moveTo(lasercanv.width/2, lasercanv.height);
+                  ctx.lineTo(lasercanv.width/2, lasercanv.height-10);
+                  ctx.stroke();
+                  
+                  //3D
+                  var geometry = new THREE.BufferGeometry();
+                  geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(laser.data.array3dData), 3 ) );
+                  var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+                  material.transparent = true;
+                  material.opacity=0.5;
+                  material.side = THREE.DoubleSide;
+		  var las = new THREE.Mesh( geometry, material );
+                  if (model.laser){
+                     model.robot.remove(model.laser);
+                  };
+                  model.robot.add(las);
+                  model.laser = las;
+
+               };
+               laser.connect();
+               laser.startStreaming();
+               
+               modelAnimation();
+	        });
+\end{lstlisting}
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\includegraphics[width=0.45\textwidth]{./img/laser2d.png}}
+\hspace{1cm}
+\subfigure[]{\includegraphics[width=0.45\textwidth]{./img/laser3d.png}}
+\caption{Láser en 2D (a) y 3D (b)}
+\label{fig:laser}
+\end{figure}
+
+
+\subsection{Interfaz gráfico}
+
+los elementos \texttt{header} y \texttt{modal} son iguales a los de \texttt{CameraViewJS} con alguna pequeña modificación, 
+por lo que nos vamos a centrar en el \texttt{body}.
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\includegraphics[width=0.55\textwidth]{./img/kobukiviewer_init.png}}
+\hspace{1cm}
+\subfigure[]{\includegraphics[width=0.25\textwidth]{./img/kobukiviewer_modal.png}}
+\caption{Interfaz (a) y Modal (b)}
+\label{fig:kobukiviewer_interfaz}
+\end{figure}
+
+El \texttt{body} consta de 5 \texttt{canvas} y un botón ordenados mediante el sistema \textit{Grid} de Bootstrap. Los dos primeros de arriba para las imágenes de las dos cámaras, 
+el tercero para el láser en 2D, el cuarto para el modelo 3D  y el quinto para el control (figura \ref{fig:kobukiviewer_body}).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.9\textwidth]{./img/kobukiviewer_body.png}
+\caption{Body de KobukiViewerJS} \label{fig:kobukiviewer_body}
+\end{figure}
+
+\lstset{language=html}
+\begin{lstlisting}
+<div id="body" class="container">
+   <div class="row">
+      <div id="buttons" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <p>
+           <button id="start" type="button" class="btn btn-md btn-success">Start</button>
+           <button id="stop" type="button" class="btn btn-md btn-danger">Stop</button>
+           <button id="config" type="button" class="btn btn-info" data-toggle="modal" data-target="#configure">Config</button>
+        </p>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Camera Left</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="camView" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Camera Right</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="camView2" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Laser</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="laser" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">3D Model</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="model" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Control</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="control" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
+         <button id="stopR" type="button" class="btn btn-info" >Stop Bot</button>
+      </div>
+   </div>
+</div>
+\end{lstlisting}
+
+Por último, cabe destacar que la escena 3D del robot usa exactamente el mismo control de cámara que el usado en \texttt{RgbdViewerJS} (figura \ref{fig:kobukiviewer_camera}), 
+de modo que la cámara de observación de la escena 3D se puede mover y girar a voluntad.
+\begin{figure}[htb]
+\centering
+\subfigure[]{\includegraphics[width=0.45\textwidth]{./img/kobuki3d.png}}
+\hspace{1cm}
+\subfigure[]{\includegraphics[width=0.45\textwidth]{./img/kobuki3d2.png}}
+\caption{Visualización 3D del robot con zoom (b) y sin él (a).}
+\label{fig:kobukiviewer_camera}
+\end{figure}
+
+%\clearpage
+\section{UavViewerJS}
+Este cliente se conecta con un drone para poderlo teleoperar desde la web. Para ello usa un \texttt{API.Camera}, un \texttt{API.Pose3D}, un \texttt{API.CmdVel} y un \texttt{API.Extra} (figura \ref{fig:uavviewerjs}).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{../traspas/img/esq_uavviewer.png}
+\caption{Arquitectura de UavViewerJS} \label{fig:uavviewerjs}
+\end{figure}
+
+La variable \texttt{config} para crearlo contiene:
+\begin{itemize}
+ \item \emph{cam1serv:} dirección y puerto del servidor de la cámara(dir:address, port:port).
+ \item \emph{cam1epname:} \textit{endpoint} del servidor de la cámara.
+ \item \emph{cam1id:} id del canvas que muestra la imagen de la cámara.
+ \item \emph{cmdvelserv:} dirección y puerto del servidor de la velocidad (dir:address, port:port).
+ \item \emph{cmdvelepname:} \textit{endpoint} del servidor de la velocidad.
+ \item \emph{control1id, control2id:} id de los canvas de los controles.
+ \item \emph{modelid:} id del canvas que muestra una representación en 3D del drone.
+ \item \emph{pose3dserv:} dirección y puerto del servidor de Pose3D (dir:address, port:port).
+ \item \emph{pose3depname:} \textit{endpoint} del servidor de Pose3D.
+ \item \emph{takeoffbtnid:} id del botón que despega el drone.
+ \item \emph{stopbtnid:} id del botón que detiene el drone.
+ \item \emph{landbtnid:} id del botón que aterriza el drone.
+ \item \emph{resetbtnid:} id del botón que resetea el drone.
+ \item \emph{extraserv:} \textit{endpoint} del servidor de ArDroneExtra, funciones propias del drone.
+ \item \emph{extraepname:} dirección y puerto del servidor del interfaz Extra(dir:address, port:port).
+ \item \emph{attitudeid, headingid, altimeterid, turn\_coordinatorid:} ids de los indicadores de vuelo.
+\end{itemize}
+
+\subsection{Conectores}
+Tanto \texttt{API.Camera} como \texttt{API.Pose3D} ya están descritos en los clientes anteriores, por lo que vamos a describir los nuevos conectores.
+
+\textbf{API.ArDroneExtra} permite conectar con la interfaz ArDroneExtra de JdeRobot. El contenido de \texttt{config} es el siguiente:
+\begin{itemize}
+ \item \emph{server:} dirección y puerto del servidor {(dir:address, port:port)}.
+ \item \emph{epname:} \textit{endpoint} del servidor, por defecto ``Extra''.
+\end{itemize}
+
+y su lista de métodos es:
+
+\begin{itemize}
+ \item \emph{createWork:} Crea el \textit{WebWorker} (se ejecuta cuando se crea el conector).
+ \item \emph{deleteWork:} Elimina el \textit{WebWorker}.
+ \item \emph{connect:} Inicia la conexión con el servidor.
+ \item \emph{disconnect:} Desconecta del servidor.
+ \item \emph{toggleCam:} Cambia de cámara del drone.
+ \item \emph{land:} Aterriza el drone.
+ \item \emph{takeoff:} Despega el drone.
+\end{itemize}
+
+\texttt{API.CmdVel}, como todo conector con actuadores, básicamente funciona igual que \texttt{API.Motors}, pero con las siguientes diferencias:
+permite conectar con la interfaz CmdVel de JdeRobot. El contenido de \texttt{config} es el siguiente:
+\begin{itemize}
+ \item \emph{server:} dirección y puerto del servidor {(dir:address, port:port)}.
+ \item \emph{epname:} \textit{endpoint} del servidor, por defecto ``CmdVel''.
+\end{itemize}
+
+y su lista de métodos es:
+
+\begin{itemize}
+ \item \emph{createWork:} Crea el \textit{WebWorker} (se ejecuta cuando se crea el conector).
+ \item \emph{deleteWork:} Elimina el \textit{WebWorker}.
+ \item \emph{connect:} Inicia la conexión con el servidor.
+ \item \emph{disconnect:} Desconecta del servidor.
+ \item \emph{setCmdVel:} Envía las velocidades al servidor (\texttt{linearX, linearY, linearZ, angularX, angularY, angularZ};).
+\end{itemize}
+
+\subsection{Núcleo}
+
+Cuando se inicia el cliente, éste inicia un \textit{streaming} de los sensores y se crean dos controles y la representación 3D. El tratamiento de las imágenes recibidas es el mismo que en \texttt{CameraViewJS}. 
+Los controles son los mismos que los creados para \texttt{KobukiViewerJS}, pero cada uno controla dos velocidades.
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+      control1 = new GUI.Control ({id:self.control1id});
+      control2 = new GUI.Control ({id:self.control2id});
+ 
+      control1.onPointerM = function (event){
+         control1.onPointerMDefault(event);
+         var distSend = 1;
+         var pos = control1.position;
+         var send = false;
+         if (calcDist(pos.x,cmdSend.linearY)>=distSend){
+            cmdSend.linearY = pos.x/2;
+            send = true;
+         }   
+         if (calcDist(pos.z,cmdSend.linearX)>=distSend){
+            cmdSend.linearX = pos.z/2;
+            send = true;
+         }
+         if (send){
+            cmdvel.setCmdVel(cmdSend);
+         }       
+      };
+      
+     control2.onPointerM = function (event){
+         control2.onPointerMDefault(event);
+         var distSend = 2;
+         var pos = control2.position;
+         var send = false;
+         if (calcDist(pos.x/10,cmdSend.angularZ)>=distSend){
+            cmdSend.angularZ = pos.x/10;
+            send = true;
+         } 
+         if (calcDist(pos.z/2,cmdSend.linearZ)>=distSend){
+            cmdSend.linearZ = pos.z/2;
+            send = true;
+         }
+         if (send){
+            cmdvel.setCmdVel(cmdSend);
+         } 
+      };
+      
+      control1.initControl();
+      control2.initControl();
+\end{lstlisting}
+
+El botón \texttt{stop drone}, coloca los Joystick en el centro y envía velocidades 0 a los motores, el resto de botones ejecutan las funciones homónimas de API.ArDroneExtra (figura \ref{fig:dronebuttons}).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.7\textwidth]{./img/uavviewerjs_extra.png}
+\caption{Botones de funciones del drone} \label{fig:dronebuttons}
+\end{figure}
+
+Para el modelo 3D se ha usado el mismo componente que en \texttt{KobukiViewerJS}, una vez creado el modelo se inicia el Pose3D y 
+cada vez que se recibe información de éste varía la posición del modelo (figura \ref{fig:drone_uav}) y de los indicadores de vuelo\footnote{\url{https://github.com/sebmatton/jQuery-Flight-Indicators}} (figura \ref{fig:indicadores}).
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:drone_uav}\includegraphics[width=0.35\textwidth]{./img/uavviewer3d.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:indicadores}\includegraphics[width=0.55\textwidth]{./img/indicadores.png}}
+\caption{Modelo 3D (a) e indicadores de vuelo (b)}
+\label{fig:uavviewer_drone}
+\end{figure}
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+  loader.loadQuadrotor(0.05,function () {
+               model.robot=loader.robot;
+               model.scene.add( model.robot );
+         
+               pose3d = new API.Pose3D({server:self.pose3dserv,epname:self.pose3depname});
+               pose3d.onmessage= function (event){
+                  pose3d.onmessageDefault(event);
+                  model.robot.position.set(pose3d.data.x,pose3d.data.z,-pose3d.data.y);
+                  model.robot.rotation.set(pose3d.data.pitch,pose3d.data.yaw,pose3d.data.roll);
+                  model.robot.updateMatrix();
+                  model.renderer.render(model.scene,model.camera);
+                  // Attitude update
+                  attitude.setRoll(-pose3d.data.roll * toDegrees);
+                  attitude.setPitch(-pose3d.data.pitch * toDegrees);
+
+                   // Altimeter update
+                   altimeter.setAltitude(pose3d.data.z*100);
+
+                   // TC update
+                   turn_coordinator.setTurn(-pose3d.data.roll * toDegrees);
+
+                   // Heading update
+                   heading.setHeading(pose3d.data.yaw * toDegrees);
+               };
+         
+               pose3d.timeoutE=timeout;
+         
+               pose3d.connect();
+               pose3d.startStreaming();
+               
+               modelAnimation();
+	        });
+\end{lstlisting}
+
+\subsection{Interfaz gráfico}
+
+Cómo ya se comentó en los anteriores clientes, los elementos \texttt{header} y \texttt{modal} son casi iguales con alguna pequeña modificación, 
+por lo que nos vamos a centrar ahora en el \texttt{body}.
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\includegraphics[width=0.55\textwidth]{./img/uavviewer_init.png}}
+\hspace{1cm}
+\subfigure[]{\includegraphics[width=0.25\textwidth]{./img/uavviewer_modal.png}}
+\caption{Interfaz (a) y Modal (b)}
+\label{fig:uavviewer_interfaz}
+\end{figure}
+
+El \texttt{body} consta de 3 filas, la primera contiene el \texttt{canvas} de la cámara y los indicadores de vuelo, la segunda los \texttt{canvas} del modelo 3D y los controles
+y la tercera contiene los botones (figura \ref{fig:uavviewer_body}).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.9\textwidth]{./img/uavviewer_body.png}
+\caption{Body de UavViewerJS} \label{fig:uavviewer_body}
+\end{figure}
+
+\lstset{language=html}
+\begin{lstlisting}
+<div id="body" class="container">
+   <div class="row">
+      <div id="buttons" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><p>
+        <button id="start" type="button" class="btn btn-md btn-success">Start</button>
+        <button id="stop" type="button" class="btn btn-md btn-danger">Stop</button>
+        <button id="config" type="button" class="btn btn-info" data-toggle="modal" data-target="#configure">Config</button>
+      </p>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Camera</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="camView" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-12 col-md-6 col-lg-8">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Flight Indicators</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <span id="attitude"></span>
+               <span id="altimeter"></span>
+               <span id="turn_coordinator"></span>
+               <span id="heading"></span>
+            </div>
+         </div>
+      </div>
+   </div>
+      
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">3D Model</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="model" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Control X + Y</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="control1" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Control Z + angle of rotation</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="control2" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div id="buttons2" class="btn-toolbar col-xs-12 col-sm-12 col-md-12 col-lg-12" role="toolbar" aria-label="buttons2">
+         <div class="btn-group" role="group" aria-label="bextra">
+            <button id="takeoff" type="button" class="btn btn-info">Takeoff</button>
+            <button id="land" type="button" class="btn btn-info">Land</button>
+            <button id="toggle" type="button" class="btn btn-info" >Toggle Camera</button>
+         </div>
+         <div class="btn-group" role="group" aria-label="stp">
+            <button id="stopb" type="button" class="btn btn-info" >Stop drone</button>
+         </div>
+      </div>
+   </div>
+</div>
+\end{lstlisting}
+
+\clearpage
+\section{IntrorobKobukiJS}
+Este cliente es exactamente el mismo que \texttt{KobukiViewerJS} pero añadiendo la infraestructura para el comportamiento autónomo (figura \ref{fig:introrobkobukijs}), 
+por lo que la variable \textbf{config} que recibe el constructor es igual. Se le han añadido dos métodos nuevos aparte de los comunes a todos los clientes:
+\begin{itemize}
+ \item \textit{startMyAlgorithm}: inicia el comportamiento autónomo.
+ \item \textit{stopMyAlgorithm}: detiene el comportamiento autónomo.
+\end{itemize}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{../traspas/img/esq_introrobkobuki.png}
+\caption{Arquitectura de IntrorobKobukiJS} \label{fig:introrobkobukijs}
+\end{figure}
+
+Utiliza los mismos \textit{conectores} que \texttt{KobukiViewerJS}.
+
+\subsection{Núcleo}
+La única diferencia con \texttt{KobukiViewerJS} es la opción de agregar comportamiento autónomo. Cuando se inicia el comportamiento autónomo se crea un \textit{WebWorker} donde se ha 
+programado dicho comportamiento. 
+EL hilo principal cada 100ms le envía los datos recibidos por los sensores al \textit{WebWorker}, y éste a su vez, después de ejecutar el comportamiento autónomo, 
+devuelve una orden de velocidad para los motores (en caso de ser necesario incluso puede detener e iniciar el envío de datos del hilo principal):
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+  this.startMyAlgorithm = function (){
+      //document.getElementById(self.controlid).SetActive(false);
+      control.removeListeners();
+      document.getElementById(self.stopbtnid).disabled = true;
+      var f = function(){
+         if (laser.data && cameraright.data && pose3d.data && cameraleft.data ){
+             var msg ={pose3d:pose3d.data,
+                  laser:{distanceData:laser.data.distanceData, numLasers:laser.data.numLaser},
+                  camr:{pixelData:cameraright.data.pixelData,height:cameraright.data.height, width:cameraright.data.width},
+                  caml:{pixelData:cameraleft.data.pixelData,height:cameraleft.data.height, width:cameraleft.data.width}};
+         worker.postMessage(msg);
+             }
+      };
+      worker = new Worker(workerFile);
+      worker.onmessage = function (m){
+         if (lastV!=m.data.v || lastW!=m.data.w){
+            lastV = m.data.v;
+            lastW = m.data.w;
+            motors.setV(lastV);
+            motors.setW(lastW);
+         }
+         var d = m.data.interval;
+         switch (d){
+         case 1:
+               interval = setInterval(f,100);
+               break;
+         case 2:
+               clearInterval(interval);
+               break;
+         default:
+         
+         }
+      };
+      interval = setInterval(f,100);
+\end{lstlisting}
+
+Para detener el comportamiento, se deja de enviar datos al \textit{\textit{WebWorker}} (se detiene el \textit{interval}) y se elimina dicho \textit{worker}. El contenido de fichero \textbf{myalgorithm\_worker.js}, 
+que contiene el \textit{script} que va a interpretar el \textit{\textit{WebWorker}} es el siguiente:
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+/* Data Recived
+ * - laser:
+ *       + distanceData : Array of distances
+ *       + numLaser: numer of lasers
+ * - pose3d:
+ *       + x,y,z: coords
+ *       + q1,q2,q3,q4 : quaternion
+ *       + yaw, pitch, roll: orientation
+ * - caml, camr:
+ *       + data: Array of Image data
+ *       + width, height: width y height of the image, in pixels
+ *
+ *********************************
+ * Data Response
+ * - v,w: velocities 
+ * - interval: if the action takes more than time reception sensor (100ms). Possible values:
+ *   + 0 : do nothing
+ *   + 1 : start interval in main thread
+ *   + 2 : stop interval in main thread
+ */
+
+onmessage = function(e) {
+    
+   var laser  = e.data.laser;
+   var pose3d = e.data.pose3d;
+   var caml = e.data.caml;
+   var camr = e.data.camr;
+   
+   var v = 0;
+   var w = 0;
+          
+   
+   postMessage({v:v,w:w,interval:0});
+}
+\end{lstlisting}
+Como se puede ver, tiene un primer comentario explicando los datos recibidos y los que se pueden enviar, 
+además de la función donde se tiene que programar en JavaScript el comportamiento autónomo, con un ejemplo de respuesta.
+
+\subsection{Interfaz gráfico}
+
+La única variación a la interfaz de \texttt{KobukiViewerJS} es que se le ha agregado un botón más a la botonera para iniciar y detener el comportamiento autónomo
+(figura \ref{fig:introrobkobuki_interfaz}), que se traduce en eliminar o crear el \textit{WebWorker} subyacente que incluye la lógica del comportamiento autónomo y el \textit{interval} de envío de datos.
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.7\textwidth]{./img/introrobkobuki_interfaz.png}
+\caption{Interfaz de IntrorobKobukiJS} \label{fig:introrobkobuki_interfaz}
+\end{figure}.
+
+
+
+\section{IntrorobUavJS}
+Es el equivalente a \texttt{IntrorobKobukiJS} pero para drones, por lo que la base es \texttt{UavViewerJS} (figura \ref{fig:introrobuavjs}).
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.7\textwidth]{../traspas/img/esq_introrobuav.png}
+\caption{Arquitectura de IntrorobUavJS} \label{fig:introrobuavjs}
+\end{figure}
+
+Utiliza los mismos \textit{conectores} que \texttt{UavViewerJS}.
+
+\subsection{Núcleo}
+
+Es este caso, el mensaje de respuesta del \textit{\textit{WebWorker}} 
+es más complejo porque se pueden enviar más órdenes que al robot kobuki, por lo tanto el fichero \textbf{myalgorithm\_worker.js} quedaría así:
+
+\lstset{language=JavaScript}
+\begin{lstlisting}
+/* Data Recived
+ * - pose3d:
+ *       + x,y,z: coords
+ *       + q1,q2,q3,q4 : quaternion
+ *       + yaw, pitch, roll: orientation
+ * - cam1:
+ *      + data: Array of Image data
+ *      + width, height: width y height of the image, in pixels
+ *
+ *********************************
+ * Data Response
+ * - com: command to send to drone. Possible values:
+ *   + sendVel : send Velocities 
+ *   + takeoff : takeoff drone
+ *   + land : land drone
+ *   + toggleCam : change camera
+ * - linearX,linearY,linearZ,angularZ: velocities 
+ * - interval: if the action takes more than time reception sensor (100ms). Possible values:
+ *   + 0 : do nothing
+ *   + 1 : start interval in main thread
+ *   + 2 : stop interval in main thread
+ */
+
+
+onmessage = function(e) {
+    
+   var pose3d = e.data.pose3d;
+   var cam1 = e.data.cam1;
+   
+   var linearX = 0;
+   var linearY = 0;
+   var linearZ = 0;
+   var angularZ = 0;
+   
+   postMessage({com:"semdVel",linearX:linearX,linearY:linearY,linearZ:linearZ,angularZ:angularZ,interval:0});
+}
+\end{lstlisting}
+
+\subsection{Interfaz gráfico}
+
+La única variación a la interfaz de \texttt{UavViewerJS} es que se le ha agregado un botón mas a la botonera para iniciar y detener el comportamiento autónomo 
+(figura \ref{fig:introrobuav_interfaz})
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.7\textwidth]{./img/introrobuav_interfaz.png}
+\caption{Interfaz de IntrorobUavJS} \label{fig:introrobuav_interfaz}
+\end{figure}.
+
+\section{JdeRobotWebClients} \label{sec:JdeRobotwebclients}
+
+Además de los seis clientes web descritos
+se ha creado un \texttt{index.html} con una pequeña explicación de la página web, como se puede ver en la figura \ref{fig:jrwc_index}, que integra en sendas pestañas cada uno de ellos.
+
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:jrwc_index1}\includegraphics[width=0.6\textwidth]{./img/jrwc_index_desktop.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:jrwc_index2}\includegraphics[width=0.3\textwidth]{./img/jrwc_index_phone.png}}
+\caption{Escritorio (a) y Móvil (b)}
+\label{fig:jrwc_index}
+\end{figure}
+
+
+Cada cliente sigue en un fichero HTML distinto, para permitir separarlos de la web más fácilmente. La única modificación que se les ha hecho es añadir un menú de navegación en el \texttt{header}
+para facilitar el cambio entre clientes.
+ \lstset{language=html}
+ \begin{lstlisting}
+<header id="header">
+  <nav class="navbar navbar-inverse" role="banner">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+        <a class="navbar-brand" href="index.html"><i class="fa fa-bolt"></i> JdeRobot Web Clients</a></a>
+     </div>
+      <div class="collapse navbar-collapse navbar-right">
+        <ul class="nav navbar-nav">
+          <li ><a href="index.html">Home</a></li>
+          <li class="active"><a href="cameraview.html">Cameraview</a></li>
+          <li><a href="rgbdviewer.html">RGBDViewer</a></li>
+          <li><a href="kobukiviewer.html">KobukiViewer</a></li>
+          <li><a href="uavviewer.html">UavViewer</a></li>
+           <li><a href="introrobkobuki.html">IntrorobKobuki</a></li>
+           <li><a href="introrobuav.html">IntrorobUav</a></li>
+        </ul>
+      </div>
+    </div>
+    <!--/.container--> 
+  </nav>
+  <!--/nav--> 
+</header>
+\end{lstlisting}
+
+
+
+
+

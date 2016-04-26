@@ -1,0 +1,380 @@
+\chapter{Introducción}
+\label{ch:Introduccion}
+Este Trabajo Fin de Grado se encuentra en la intersección entre dos campos, la robótica y las tecnologías web.
+En este capítulo vamos a introducir los conceptos de \textit{middelware} robótico y aplicación web. A modo de ejemplo se presentan varias aplicaciones web
+que usan sendos \textit{middlewares} robóticos. En particular las dos empleadas en el laboratorio de robótica de la URJC, que son el contexto inmediato de este TFG.
+
+\section{Robótica}
+%Un Framework es un conjunto estandarizado de conceptos, prácticas y criterios para hacer frente a un tipo común de problema, 
+% que puede ser usado para ayudarnos a  resolverlo de forma rápida y eficaz.
+
+%El objetivo de los Frameworks es proporcionar una estructura común, de modo que los desarrolladores no tienen que hacer el 
+%código de cero cada vez y puede volver a utilizar la gran mayoría.
+La palabra robot proviene del término checo robota, cuyo significado es ``servidumbre, 
+trabajo forzado o esclavitud''. Principalmente usado para referirse a los siervos
+checoslovacos de la época feudal, con el paso de las épocas ha ido evolucionando hasta 
+la actualidad que el término es usado por la juventud checa y eslovaca 
+para referirse al trabajo aburrido o poco interesante. Según la Real Academia
+Española, el término robot se refiere a:
+\begin{verse}
+``Máquina o ingenio electrónico programable, capaz de manipular objetos
+y realizar operaciones antes reservadas sólo a las personas''
+\end{verse}
+
+La robótica como hoy la conocemos, surge hacia la década de los 50, con la construcción de las primeras computadoras. Aunque no será hasta la década de los 70 con
+los primeros microprocesadores cuando comience su vertiginoso avance. En 1954 George Devol diseñó el primer mecanismo programable
+aplicado a la industria, el ``Universal Automation o Unimation'',
+que sería el corazón del primer brazo robótico industrial. Los brazos robóticos son usados para tareas repetitivas pudiendo mantener siempre la misma precisión. 
+Hasta ahora han avanzado mucho y ya no son sólo brazos robóticos, incluyen cámaras, por ejemplo. Uno de los robots industriales más avanzados es Baxter (figura \ref{fig:baxter})
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.6\textwidth]{../traspas/img/robot_industrial.jpg}
+\label{fig:baxter}
+\caption{Baxter en una cadena de embalaje}
+\end{figure}
+
+Fuera de las fábricas se empezaron a usar en terrenos hostiles para el hombre, como las zonas radioactivas o en la exploración espacial. 
+Además, actualmente se empieza a usar en otros entornos como la agricultura, el ocio y el entretenimiento. Por ejemplo, robots como Aibo de Sony (figura \ref{fig:aibo}) 
+y en los hogares Roomba (figura \ref{fig:roomba}) para la limpieza de la casa, en los coches, con las funciones como aparcar o incluso de conducir solos (figura \ref{fig:google}).
+También se usan en los almacenes grandes como los de Amazon para transportar los productos de un lado a otro (figura \ref{fig:amazon})
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:roomba}\includegraphics[width=0.4\textwidth]{./img/IRobot_Roomba_780.jpg}}
+\hspace{1cm}
+\subfigure[]{\label{fig:aibo}\includegraphics[width=0.4\textwidth]{./img/aibo.jpeg}}
+\caption{Roomba de iRobot (a) y Aibo de Sony (b)}
+\label{fig:roboejemplo1}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:google}\includegraphics[width=0.48\textwidth]{../traspas/img/coche_google.jpg}}
+\hspace{0.2cm}
+\subfigure[]{\label{fig:amazon}\includegraphics[width=0.48\textwidth]{./img/Robots-Amazon-2.jpg}}
+\caption{GoogleCar (a) y Robots de Amazon (b)}
+\label{fig:roboejemplo2}
+\end{figure}
+
+Actualmente hay robots que entienden emociones e interactúan con personas para hacerlas sentir mejor, como es el caso de 
+Pepper\footnote{fuente: \url{https://www.aldebaran.com/en/Launch_Sales_of_Pepper}} (figura \ref{fig:pepper}) o incluso son capaces de realizar labores de recepcionista en un hotel en 
+Japón\footnote{fuente: \url{http://cnnespanol.cnn.com/2015/07/18/inauguran-en-japon-el-primer-hotel-atendido-por-robots/}} (figura \ref{fig:hotel}).
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:pepper}\includegraphics[width=0.48\textwidth]{./img/pepper.jpg}}
+\hspace{0.2cm}
+\subfigure[]{\label{fig:hotel}\includegraphics[width=0.48\textwidth]{./img/Hotel.jpg}}
+\caption{Pepper (a) y Hotel robótico (b)}
+\label{fig:roboejemplo3}
+\end{figure}
+
+
+Sin un \textit{software} todo esto sería impensable. \textit{Hardware} y \textit{software} deben trabajar juntos, 
+no pueden existir el uno sin el otro. Un robot no puede funcionar sin un \textit{software} que le permita acceder a los datos de los sensores y actuadores, 
+que le dote de inteligencia, le permita llevar a cabo algoritmos perceptivos y de toma de decisiones. En definitiva, sin un \textit{software}, un robot no difiere mucho de un pisapapeles muy caro.
+
+
+El \textit{middleware} es un \textit{software} que asiste a una aplicación para interactuar o comunicarse con otras aplicaciones, o paquetes de programas, redes, hardware y/o sistemas operativos. 
+ Éste simplifica el trabajo de los programadores en la compleja tarea de generar las conexiones y sincronizaciones que son necesarias en los sistemas distribuidos. 
+ Abstrae de la complejidad y heterogeneidad de las redes de comunicaciones subyacentes, así como de los sistemas operativos, proporcionando una API para la fácil 
+ programación y manejo de aplicaciones distribuidas.
+
+
+ En los últimos años se han asentado varios \textit{middlewares} en el campo de la robótica, que simplifican la creación de aplicaciones en ese ámbito.
+\subsection{ROS}
+ROS\footnote{Web: \url{http://www.ros.org/}} es un \textit{middelware} para el desarrollo de \textit{software} para robots, bajo
+licencia de código abierto y mantenido por OSRF\footnote{\url{http://www.osrfoundation.org/}} (\textit{Open Source Robotics Foundation}). Provee servicios típicos de un sistema operativo, como son
+abstracción de acceso al hardware, control de bajo nivel para dispositivos, mecanismos
+de paso de mensajes entre procesos y nodos (\textit{Topics Services Actions}) y mantenimiento de paquetes. Se propone como una capa mediadora entre
+el robot y sistema operativo por un lado y el programador por otro. Es un \textit{software} multi-plataforma aunque actualmente sólo la versión para
+Linux es considerada estable. Por el momento, los lenguajes
+de desarrollo soportados son C++, Python y LISP, aunque hay intención de soportar algunos
+más proporcionando librerías cliente que puedan acceder al API de ROS, como es el caso de \texttt{roslibjs} que da soporte para JavaScript
+
+Su diseño va en la línea de ser lo más ligero posible y capaz
+de ser integrado o utilizado fácilmente por otros sistemas existentes, para fomentar la
+reutilización de \textit{software} robótico. Sus librerías se han diseñado para ofrecer
+interfaces claros y limpios. 
+
+Otro punto a destacar es su sistema de gestión del \textit{software}, que provee mecanismos
+para la distribución e integración de paquetes de \textit{software} con funcionalidad determinada. 
+Incluye la estructura de directorios que un paquete debe tener y cómo deben
+usarse, descripciones de la funcionalidad contenida, y detalles de alto nivel de cómo se
+comunica dicho \textit{software} con otras piezas.
+
+Se ha extendido tanto, como demuestran sus aproximadamente 9 millones de paquetes descargados de unas 70.000 IPs diferentes sólo en Mayo de 2015, que se ha convertido en un estándar de facto.
+
+\subsection{JdeRobot}
+JdeRobot \cite {jderobot} es un \textit{middelware} para el desarrollo de aplicaciones orientadas a la robótica,
+domótica y visión artificial (ejemplos en la figura \ref{fig:jderobot}). La versión actual de JdeRobot es la 5.3. Esta plataforma
+está diseñada para facilitar la programación de \textit{software} que dote de cierta inteligencia
+a hardwares tan distintos como cámaras, actuadores y en general robots de todo tipo.
+Los componentes están escritos en C++, Python, Java... y basadas en un entorno de
+componentes distribuidos. Cada aplicación está construida con la concurrencia de varios
+componentes asíncronos. Cada componente puede ejecutarse en una máquina distinta
+y para su interconexión se usa el \textit{middelware} de comunicaciones ICE \cite {ice}.
+
+JdeRobot simplifica el acceso a los dispositivos hardware desde el programa principal.
+Así, obtener una medida de un sensor u ordenar un movimiento a un motor es tan simple
+como llamar a una función local.
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:uav_viewer}\includegraphics[width=0.4\textwidth]{./img/jde_uav_viewer.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:intro}\includegraphics[width=0.4\textwidth]{./img/jde_introrob.png}}
+\caption{Uav Viewer (a) e Introrob (b)}
+\label{fig:jderobot}
+\end{figure}
+
+Los componentes desarrollados por JdeRobot pueden conectarse a sensores y actuadores
+reales o simulados. Estas conexiones pueden ser locales (dentro de la misma máquina), 
+a nivel de red local o usando Internet.
+
+Actualmente se usa tanto en docencia como en investigación en la URJC y ha formado parte del \textit{Google Summer of Code 2015}\footnote{\url{https://www.google-melange.com/gsoc/org2/google/gsoc2015/jderobot}}
+, programa donde Google remunera a los estudiantes  mayores de 18 años que completan un proyecto de programación de \textit{software} libre durante ese periodo de verano.
+
+\subsubsection{ICE}
+
+ZeroC ICE \cite{ice}\cite{ice_manual} (\textit{Internet Communications Engine}) es un \textit{middleware} de comunicaciones, \textit{software} libre, orientado al desarrollo de aplicaciones 
+distribuidas que permite a los programadores centrarse en la lógica de la aplicación,
+haciendo transparentes detalles como abrir conexiones, retransmitir paquetes por la red, serialización, etc.
+Es compatible con lenguajes como C++, Java, Python, PHP o C\#, haciendo posible que dos máquinas
+con procesos escritos en lenguajes distintos puedan comunicarse.
+
+ICE ofrece mecanismos de RPC (llamadas a procedimientos remotos), tanto asíncronas como síncronas, control de hilos sin necesidad
+de preocuparnos por regiones críticas en cuanto a accesos a memoria, posibilidad de elegir entre TCP,
+UDP o SSL como protocolos de nivel de transporte, y un lenguaje propio llamado \textit{slice} para establecer
+interfaces de comunicación. Con \textit{slice} se pueden definir clases, métodos, tipos definidos por el usuario como
+diccionarios, secuencias o enumeraciones, herencias, excepciones, etc. Tras definir una interfaz, es necesario
+traducirlo al lenguaje concreto de nuestra aplicación mediante unos compiladores llamados ice2``lenguaje''\cite{slicecomp} ya incluidos en la instalación, por ejemplo, \texttt{ice2cpp, ice2python}. 
+
+La versión utilizada en este proyecto es la 3.5.1.
+
+\section{Tecnologías Web}
+La principal manera de acceder a Internet es mediante el navegador para ver páginas web y para ello se utiliza el protocolo HTTP. Las aplicaciones web tienen un lado cliente y un lado servidor. Los lenguajes más usados en el lado del cliente 
+son HTML, para explresar el contenido de las páginas, JavaScript para interactuar con ellas y CSS para modificar su apariencia. En este punto vamos a tratar cada una de estas tecnologías. Una de las principales
+ventajas es que son multiplataforma y de la mano de los \textit{smartphones} se han convertido en una verdadera revolución digital. Actualmente \textit{World Wide Web Consortium} (W3C) está elaborando una API
+ para permitir a las aplicaciones del navegador realizar llamadas de voz, chat de vídeo y uso compartido de archivos P2P sin plugins, llamada WebRTC\footnote{\url{https://webrtc.org/}}.
+
+Internet es un conjunto descentralizado de redes de comunicación interconectadas que utilizan la familia de protocolos TCP/IP, 
+lo cual garantiza que las redes físicas heterogéneas que la componen funcionen como una red lógica única de alcance mundial. Nació a partir de una red denominada ARPANET, diseñada y desarrollada en 1969 para el Departamento de 
+Defensa de Estados Unidos, creada para mantener la comunicación entre computadoras en caso de guerra. 
+
+Estados Unidos fue capaz de desarrollar una red que funcionara (la antecesora de la actual Internet) y 
+los usuarios académicos e investigadores que tenían acceso a ella empezaron a emplearla constantemente. 
+Los desarrolladores de Internet en Estados Unidos, el Reino Unido y Escandinavia, en respuesta a las presiones del mercado, empezaron a poner el \textit{software} de IP 
+(\textit{Internet Protocol}) en todo tipo de computadoras, llegando a ser un estándar. Al mismo tiempo que Internet se consolidaba, muchas 
+compañías y otras organizaciones empezaron a construir redes privadas usando los mismos protocolos de ARPAnet, por lo que los usuarios de una red podrían comunicarse con 
+usuarios de otra. 
+
+Actualmente se usa para casi todo, desde buscar direcciones en un mapa (figura \ref{fig:maps}), enterarse de las noticias viendo el periódico (figura \ref{fig:elpais}), 
+relacionarse con otras personas (figura \ref{fig:facebook}) o incluso han cambiado la forma en la que vemos la televisión (figura \ref{fig:netflix}).
+
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:maps}\includegraphics[width=0.4\textwidth]{../traspas/img/maps.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:facebook}\includegraphics[width=0.4\textwidth]{../traspas/img/facebook-9.png}}
+\caption{Google Maps (a) y Facebook (b)}
+\label{fig:htmlejemplo1}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:elpais}\includegraphics[width=0.4\textwidth]{../traspas/img/elpais.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:netflix}\includegraphics[width=0.4\textwidth]{../traspas/img/netflix.png}}
+\caption{El País (a) y Netflix (b)}
+\label{fig:htmloejemplo2}
+\end{figure}
+
+\subsection{HTTP}
+Este protocolo fue desarrollado por el \textit{World Wide
+Web Consortium}\footnote{Web: \url{http://www.w3.org/}} y la \textit{Internet Engineering Task Force}. En 1999 se publicó la versión 1.1
+usada en la actualidad. HTTP define la sintaxis y la semántica que utilizan los elementos
+de \textit{software} de la arquitectura web (clientes, servidores, proxies) para comunicarse. Es un protocolo orientado a transacciones y 
+sigue el esquema petición-respuesta entre un cliente y un servidor (figura \ref{fig:httpclient-serv}). Al cliente que efectúa la petición (un navegador web) se lo 
+conoce como \textit{user agent} (agente del usuario). A la información transmitida se le llama recurso y se identifica mediante un localizador uniforme de recursos (URL). 
+El recurso es el resultado de la ejecución de un programa, una consulta a una base de datos, la traducción automática de un documento, etc.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/HTTPclient-serv.png}
+\caption{Comunicación cliente servidor en HTTP.} \label{fig:httpclient-serv}
+\end{figure}
+
+Es un protocolo sin estado, es decir, que no guarda ninguna información sobre
+conexiones anteriores.
+
+\subsection{HTML}
+HTML significa Lenguaje de Marcado para Hipertextos (\textit{HyperText Markup Language}), y es el bloque de construcción más básico de una página web. Se usa para crear 
+y representar visualmente una página web. Determina el contenido de la página web, pero no su funcionalidad. Consta de etiquetas para delimitar los bloques (figura \ref{fig:html-example})
+
+Es un estándar a cargo de la W3C\footnote{Web: \url{http://www.w3.org/}}, organización dedicada a la estandarización de casi todas las tecnologías ligadas a la web. 
+Se considera el lenguaje web más importante siendo su invención crucial en la aparición, 
+desarrollo y expansión de la \textit{World Wide Web}. Es el estándar que se ha impuesto en la visualización de páginas web y es el que todos los navegadores actuales han adoptado.
+
+A lo largo de sus diferentes versiones, se han incorporado y suprimido diversas características, 
+con el fin de hacerlo más eficiente y facilitar el desarrollo de páginas web compatibles con distintos navegadores y plataformas (PC de escritorio, 
+portátiles, teléfonos inteligentes, tabletas, etc.). No obstante, para interpretar correctamente una nueva versión de HTML, los desarrolladores de navegadores 
+web deben incorporar estos cambios.  Así mismo, las páginas escritas 
+en una versión anterior de HTML deberían ser actualizadas o reescritas, lo que no siempre se cumple. 
+Es por ello que ciertos navegadores aún mantienen la capacidad de interpretar páginas web de versiones HTML anteriores. Por estas razones, 
+aún existen diferencias entre distintos navegadores y versiones al interpretar una misma página web.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.5\textwidth]{./img/HTML_source_code_example.png}
+\caption{Ejemplo de código HTML.} \label{fig:html-example}
+\end{figure}
+
+El origen de HTML se remonta a 1980, cuando el físico Tim Berners-Lee, trabajador del CERN (Organización Europea para la Investigación Nuclear) 
+propuso un nuevo sistema de "hipertexto" para compartir documentos. Tras finalizar el desarrollo, Tim Berners-Lee lo presentó a una convocatoria organizada 
+para desarrollar un sistema de "hipertexto" para Internet. Después de unir sus fuerzas con el ingeniero de sistemas Robert Cailliau, 
+presentaron la propuesta ganadora llamada WorldWideWeb (W3). El primer documento formal con la descripción de HTML se publicó en 1991 bajo el nombre HTML Tags (Etiquetas HTML).
+
+La primera propuesta oficial para convertir HTML en un estándar se realizó en 1993 por parte del organismo IETF (\textit{Internet Engineering Task Force}). Aunque no consiguieron convertirse en estándar oficial.
+
+En 1995, el organismo IETF organiza un grupo de trabajo de HTML y consigue publicar, 
+el 22 de septiembre de ese mismo año, el estándar HTML 2.0. A pesar de su nombre, HTML 2.0 es el primer estándar oficial de HTML.
+
+A partir de 1996, los estándares de HTML los publica otro organismo de estandarización llamado W3C (\textit{World Wide Web Consortium}\footnote{Web: \url{http://www.w3.org/}}). 
+La versión HTML 3.2 se publicó el 14 de Enero de 1997. Esta revisión incorpora \textit{applets} de Java y texto que fluye alrededor de las imágenes.
+
+
+HTML 4.0 se publicó el 24 de abril de 1998
+y supone un gran salto desde las versiones anteriores. Entre sus novedades más destacadas se encuentran las hojas de estilos CSS, 
+la posibilidad de incluir pequeños programas o \textit{scripts} en las páginas web, mejora de la accesibilidad de las páginas diseñadas, tablas complejas y mejoras en los formularios.
+
+Desde la publicación de HTML 4.01, la actividad de estandarización de HTML se detuvo y el W3C se centró en el desarrollo del estándar XHTML. 
+Por este motivo, en el año 2004, las empresas Apple, Mozilla y Opera mostraron su preocupación por la falta de interés del W3C en HTML y 
+decidieron organizarse en una nueva asociación llamada WHATWG (\textit{Web Hypertext Application Technology Working Group}).
+
+Debido a la fuerza de las empresas que forman el grupo WHATWG y a la publicación de los borradores de HTML 5.0, 
+en marzo de 2007 el W3C\footnote{Web: \url{http://www.w3.org/}} 
+decidió retomar la actividad estandarizadora de HTML. La versión definitiva de la quinta revisión del estándar se publicó en octubre de 2014\footnote{\url{http://www.w3.org/TR/2014/REC-html5-20141028/.}} 
+Esta revisión incluye nuevas características como pueden ser la geolocalización (hasta la llegada de los \textit{smartphones} no era necesaria) y soporte para vídeos y audios sin necesidad de plugins externos. 
+
+
+
+\subsection{JavaScript}
+JavaScript (abreviado comúnmente ``JS'') es un lenguaje de programación interpretado, 
+dialecto del estándar ECMAScript. Se define como orientado a objetos, basado en prototipos, imperativo, débilmente tipado y dinámico. Se utiliza principalmente en su forma del lado del cliente (\textit{client-side}), que es lo que usamos en este TFG 
+y que describiremos en detalle en el capítulo 3, 
+se ejecuta dentro del navegador web, que contiene el intérprete de JavaScript, permitiendo mejoras en la interfaz de usuario y páginas web dinámicas.
+
+La idea de JavaScript surgió cuando a principios de los 90 con unas aplicaciones web cada vez más complejas y una velocidad de navegación tan lenta, 
+surgió la necesidad de un lenguaje de programación que se ejecutara en el navegador del usuario y Brendan Eich, 
+un programador que trabajaba en Netscape, creó LiveScript.
+
+Posteriormente, Netscape firmó una alianza con Sun Microsystems para el desarrollo del nuevo lenguaje de programación. 
+Además, justo antes del lanzamiento Netscape decidió cambiar el nombre por el de JavaScript. La razón del cambio de 
+nombre fue exclusivamente por marketing, ya que Java era la palabra de moda en el mundo informático y de Internet de la época.
+
+La primera versión de JavaScript fue un completo éxito. Al mismo tiempo, Microsoft lanzó JScript con su navegador Internet Explorer 3, el cual era una copia de JavaScript 
+al que le cambiaron el nombre para evitar problemas legales. Para evitar una guerra de tecnologías, Netscape decidió que lo mejor sería estandarizar el lenguaje JavaScript. 
+De esta forma, en 1997 se envió la especificación JavaScript 1.1 al organismo ECMA\footnote{\url{http://www.ecma-international.org/}} (\textit{European Computer Manufacturers Association}).
+
+ECMA creó el comité TC39 con el objetivo de ``estandarizar de un lenguaje de \textit{script} multiplataforma e 
+independiente de cualquier empresa''. El primer estándar que creó el comité TC39 se denominó ECMA-262, en el que se definió por primera vez el lenguaje ECMAScript.
+
+Al principio muchos desarrolladores renegaban del lenguaje porque el público al que va dirigido lo formaban 
+publicadores de artículos y demás aficionados, entre otras razones. La llegada de AJAX (permite interacciones ligeras entre navegador y servidor web) devolvió JavaScript a la fama y 
+atrajo la atención de muchos otros programadores. Como resultado de esto hubo una proliferación de un conjunto de entornos y 
+librerías de ámbito general, mejorando las prácticas de programación con JavaScript, y aumentado el uso de JavaScript fuera de los navegadores web, 
+como se ha visto con la proliferación de entornos JavaScript del lado del servidor. En enero de 2009, el proyecto CommonJS fue 
+inaugurado con el objetivo de especificar una librería para uso de tareas comunes principalmente para el desarrollo fuera del navegador web. En mayo de 2009 surge Node.js \footnote{\url{https://nodejs.org/en/}} que permite ejecutar 
+aplicaciones JavaScript en el lado del servidor.
+
+En Junio de 2015 se cerró y publicó el estándar ECMAScript\footnote{\url{http://www.ecma-international.org/publications/standards/Ecma-262.htm}} 619 20 (última versión hasta la fecha) con un soporte irregular entre navegadores y 
+que dota a JavaScript de características avanzadas que se echaban de menos y que son de uso habitual en otros lenguajes como, 
+por ejemplo, módulos para organización del código, verdaderas clases para POO, expresiones de flecha, iteradores, generadores o promesas para programación asíncrona.
+
+Más allá del lenguaje hay bloques de funcionalidad ya resuelta, bibliotecas en JavaScript que se verán con mas detalle en el capítulo 3.
+
+JQuery\cite{jquery} es una biblioteca de JavaScript, creada inicialmente por John Resig, que permite simplificar el uso de JavaScript. La primera versión de jQuery se presentó en Febrero de 2006. Esta librería sorprendió gratamente a la comunidad de desarrolladores web puesto 
+que simplificaba en gran medida la programación de código JavaScript para interactuar, tanto con los elementos del DOM como para gestionar los diferentes 
+eventos que se producen en la visita de una página web. Desde su publicación, la librería ha evolucionado solucionando errores, optimizando su código y 
+ampliando las funcionalidades ofrecidas. Actualmente está la versión 2.14 y cuenta con el apoyo de Google, Microsoft, IBM,...
+
+
+WebGL\cite{webgl} es una especificación estándar que está siendo desarrollada actualmente para mostrar gráficos en 3D en navegadores web. Técnicamente es un API para JavaScript que permite usar la implementación nativa de OpenGL ES 2.0 que será incorporada en los navegadores. 
+WebGL es gestionado por el consorcio de tecnología sin ánimo de lucro Khronos Group\footnote{\url{https://www.khronos.org/}}. WebGL creció desde los experimentos del canvas 3D comenzados Mozilla. El primero mostró un prototipo de Canvas 3D en 2006. 
+A finales de 2007, tanto Mozilla como Opera habían hecho sus propias implementaciones separadas. Notables primeras aplicaciones de WebGL son Google Maps y Zygote Body.
+
+\section{Tecnologías web en middlewares robóticos}
+Este TFG se sitúa a caballo entre los dos campos mencionados, robótica y tecnologías web. Algunos trabajos previos existentes en esta intersección son los siguientes. 
+\subsection{The Robot Management System}
+El RMS\footnote{\url{http://wiki.ros.org/rms/}} (Robot Management System) es una herramienta que permite controlar desde una página web robots que tengan el \textit{middleware} ROS. RMS en sí se refiere a un sistema de gestión web escrito en PHP que está respaldado por una base de datos MySQL. 
+El sistema utiliza un framework modelo-vista-controlador (MVC) a través del popular framework CakePHP\footnote{\url{http://cakephp.org/}}. RMS está escrito en forma independiente de 
+la plataforma robot (el robot en sí) por lo que permite el control de una gran variedad de robots. Además de ser multiplataforma, RMS permite usuario básico y gestión de accesos, 
+gestión de la interfaz, gestión de contenidos, y los estudios de los usuarios remotos. RMS se desarrolla como parte del esfuerzo por desarrollar herramienta de la ``Robot Web Tools''\footnote{\url{http://robotwebtools.org/}}.
+En la Figura \ref{fig:rms} hay un ejemplo de cómo se ve dicha aplicación.
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:rms1}\includegraphics[width=0.4\textwidth]{./img/rms1.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:rms2}\includegraphics[width=0.4\textwidth]{./img/rms2.png}}
+\caption{Menú de RMS (a) y Cámara a través de RMS (b)}
+\label{fig:rms}
+\end{figure}
+\subsection{Surveillance 4.0 (URJC)}
+\label{ssec:s4}
+
+\textbf{Surveillance 4.0} \cite{TFGsurveillance4.0} \cite{surveillance4.0} fue desarrollado por Daniel Castellano como su Proyecto
+Fin de Carrera. Esta aplicación contaba con varios sensores de distinto tipo (humedad,
+temperatura, gas, etc) que se conectaban inalámbricamente con un nodo central situado
+en una Raspberry Pi. La conexión inalámbrica se hacía mediante transmisores Zigbee\footnote{\url{http://www.zigbee.org/}}
+con un protocolo propio llamado WHAP. El nodo central recibía los datos de los sensores y
+los mostraba mediante un servidor web que corría en la misma máquina. La aplicación web
+se desarrolló en Python usando el entorno de desarrollo web Django. En Surveillance 4.0, los
+valores de los sensores se guardaban en una base de datos que la aplicación web consultaba
+cuando era necesario. Además, esta versión incluía un \textit{streaming} de vídeo utilizando
+el \textit{software} de código abierto M-JPEG Streamer. En la figura \ref{fig:surveillance4} se puede ver la aplicación.
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:su41}\includegraphics[width=0.7\textwidth]{./img/surveillance4.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:su42}\includegraphics[width=0.7\textwidth]{../traspas/img/Esquema_s4.png}}
+\caption{interfaz (a) y arquitectura (b)}
+\label{fig:surveillance4}
+\end{figure}
+
+
+
+\subsection{Surveillance 5.1 (URJC)}
+\label{ssec:s5}
+\textbf{Surveillance 5.1} \cite{TFGsurveillance5.1} \cite{surveillance5.1} fue desarrollado por Edgar Barrero como su Trabajo Fin de Grado. 
+Esta aplicación obtenía un flujo de imágenes de una cámara web, un flujo de imágenes de profundidad de un sensor Kinect, 
+además de datos de un sensor de humedad y de interaccionar con un actuador. La aplicación web
+se desarrolló en Ruby sobre Rails. En Surveillance 5.1, el servidor web se conectaba a los componente de JdeRobot mediante sus interfaces ICE.
+La aplicación web refrescaba estos datos mediante peticiones AJAX.  En la figura \ref{fig:surveillance5} se puede ver la aplicación.
+
+\begin{figure}[htb]
+\centering
+\subfigure[]{\label{fig:su51}\includegraphics[width=0.7\textwidth]{./img/surveillance5.png}}
+\hspace{1cm}
+\subfigure[]{\label{fig:su52}\includegraphics[width=0.7\textwidth]{../traspas/img/esquema_s5.png}}
+\caption{interfaz (a) y arquitectura (b)}
+\label{fig:surveillance5}
+\end{figure}
+
+\vspace{2cm}
+En el Trabajo de Fin de Grado presentado en esta memoria se desarrollan seis clientes web: CameraViewJS, RGBDViewerJS, KobukiViewerJS, UavViewerJS, IntrorobKobukiJS e IntrorobUavJS, 
+que son las versiones web de las herramientas de JdeRobot homónimas y que hablan directamente con los servidores que tiene JdeRobot para acceder a los sensores y robots a diferencia 
+de los dos últimos antecedentes, que usan un servidor web como intermediario.
+
+
+En el siguiente capítulo se presentan los objetivos de este TFG. En el capítulo de
+Plataforma de Desarrollo se hace un resumen de las tecnologías usadas en los clientes.
+En el capítulo de Diseño e implementación se profundiza en el diseño y programación de los clientes.
+Las pruebas se detallan en el capítulo de Experimentos.
+Por último, el capítulo de Conclusiones se hace un resumen de los objetivos logrados y se presentan futuras líneas de trabajo.
+
+
+

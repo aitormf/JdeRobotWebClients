@@ -1,0 +1,391 @@
+\chapter{Plataforma de Desarrollo}
+\label{ch:PlataformaDesarrollo}
+
+Una vez que hemos detallado los requisitos y objetivos de este
+proyecto, vamos a describir en este capítulo la infraestructura empleada y en la que nos hemos apoyado.
+
+\section{Simulador Gazebo}
+
+Gazebo\cite {gazebo} es un simulador de software libre que incluye multitud de modelos
+y motores de física virtualizada y está mantenido por OSRF\footnote{\url{http://www.osrfoundation.org/}} (\textit{Open Source Robotics Foundation}). 
+Ofrece una interfaz gráfica y control sobre los objetos
+y el mundo (bastante realista) generado, además de la creación y modificación de actuadores y sensores
+personalizados. Permite probar algoritmos robóticos en mundos virtuales para madurarlos antes de llevarlos a robots reales, 
+también permite impartir docencia en robótica sin tener los robots físicamente.
+Por ejemplo, se pueden crear vehículos con diferentes sensores o casas
+con las que interactuar. En la figura \ref{fig:gazebo} se puede ver la interfaz gráfica de Gazebo. Ha sido elegido por DARPA para su DRC\footnote{\url{http://www.theroboticschallenge.org/}}.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/gazebo-sample.png}
+\caption{Interfaz gráfica del simulador Gazebo.} \label{fig:gazebo}
+\end{figure}
+
+Nosotros lo hemos utilizado tanto para probar los teleoperadores (UavViewerJS, KobukiViewerJS) como los introrob (IntrorobUavJS, IntrorobKobuki) 
+con robots y drones simulados hasta que han sido lo suficientemente maduros.
+
+\section{JdeRobot}
+\label{sec:plat_jderobot}
+A continuación se detallan los componentes de \textit{JdeRobot}, plataforma ya introducida en el capítulo 1, utilizados en este TFG. 
+Una de las ventajas que tiene es que el interfaz ICE del driver real y simulado es el mismo por lo que con cambiar la configuración 
+se puede usar uno u otro sin tener que volver a compilar las aplicaciones.
+
+En este TFG se ha utilizado la versión 5.3.1.
+
+\subsection{CameraServer + CameraView}
+
+\texttt{Cameraserver}\cite {cameraserver} es un componente incluido en JdeRobot que ofrece \textit{streaming} de vídeo
+de una o varias cámaras, tanto reales como simuladas. Usa GStreamer\cite {gstreamer} internamente para manejar y procesar las
+fuentes de vídeo. Está escrito en C++ y ofrece una interfaz ICE con la que comunicarse. 
+La figura \ref{fig:esq_cameraserver} ofrece un esquema del funcionamiento de \texttt{cameraserver} junto a otro componente de JdeRobot que muestra el \textit{streaming} de vídeo.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/esq_cameraserver.png}
+\caption{Ejemplo del uso del componente CameraServer.} \label{fig:esq_cameraserver}
+\end{figure}
+
+Cualquier programa que quiera conectarse con el componente \texttt{cameraserver} debe
+importar la interfaz \texttt{camera.ice}. Esta interfaz a su vez importa otra llamada \texttt{image.ice}.
+Esta última contiene un método llamado ``getImageData(String ImgFormat)''. Al invocar este método se devuelve
+una estructura formada por una imagen en el formato indicado con \texttt{ImgFormat} y las características de la misma.
+
+Para la ejecución de este componente, es necesario proporcionar la ruta de su archivo
+de configuración. En este fichero de configuración se define la IP y puerto donde escucha
+el servidor, el número y nombre de las cámaras que tiene y la configuración de las mismas.
+
+\subsection{Openni1Server + RgbdViewer}
+
+\texttt{Openni1Server}\cite {openni1server} es otro componente incluido en JdeRobot. Está escrito en C++
+y para su funcionamiento usa las librerías Opencv\footnote{\url{http://opencv.org/}} y Openni\footnote{\url{http://www.openni.tk/openni/}} entre otras. Este
+componente tiene todos los drivers necesarios para acceder al sensor Kinect y ofrece tres
+tipos de datos: una imagen RGB, una imagen de profundidad y una nube de puntos. Al
+ofrecer tres tipos distintos de datos tiene tres interfaces ICE. En este TFG sólo se va a
+hacer uso de las interfaces de imágenes. 
+
+Para usar tanto la interfaz de imagen RGB como la de profundidad hacen falta los mismos interfaces ICE que en \texttt{CameraServer} ya que al 
+tratarse de \textit{streamings} de imágenes se ha unificado la interfaz. De nuevo la interfaz contiene un método llamado ``getImageData(String ImgFormat)''. Al invocar este método se devuelve
+una estructura formada por una imagen en el formato indicado con \texttt{ImgFormat} y las características de la misma, en el caso de la imagen RGB ImgFormat es ``RGB8'' 
+mientras que en la imagen de distancia es ``DEPTH8\_16''. En la figura \ref{fig:esq_openniserver} se refleja éste funcionamiento.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=1\textwidth]{./img/esq_openni1server.png}
+\caption{Ejemplo del uso del componente Openni1Server.} \label{fig:esq_openniserver}
+\end{figure}
+
+\subsection{Ardrone\_server + uav\_viewer}
+
+\texttt{Ardrone\_server}\cite {ardrone_server} es otro componente incluido en JdeRobot, escrito en C++. Este
+componente permite comunicarse con el drone ArDrone 2 + GPS de Parrot, ofreciendo varias interfaces tanto para recibir información como para enviar órdenes (Imagen, Pose3D, CmdVel, ...). 
+
+Primero se enciende el drone, se conecta la máquina a la red wifi suya y se ejecuta \texttt{Ardrone\_server}. A través de
+sus interfaces, el cliente recibe tanto la información de la imagen (misma interfaz que \texttt{cameraserver}), como el Pose3D (posición y orientación del drone) 
+y otras informaciones como pueden ser la batería restante por ejemplo (NavData). También se pueden enviar órdenes como 
+la velocidad (CmdVel) u otras propias de aeronaves como despegar, aterrizar,...(ArDroneExtra).  
+En la figura \ref{fig:esq_drone_server} se refleja éste funcionamiento.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=1\textwidth]{./img/esq_drone_server.png}
+\caption{Ejemplo del uso del componente Ardrone\_server.} \label{fig:esq_drone_server}
+\end{figure}
+
+\subsection{Kobuki\_driver + kobukiViewer}
+
+\texttt{Kobuki\_driver}\cite {kobuki_driver} es otro componente incluido en JdeRobot, escrito en C++. Este
+componente permite comunicarse con el robot Kobuki, ofreciendo varias interfaces tanto para recibir información como para enviar órdenes (Imagen, Pose3D, Motors, ...). 
+
+Primero se enciende el Kobuki, se conecta el robot por USB al PC y se ejecuta \texttt{kobuki\_driver}. A través de
+sus interfaces, el cliente recibe tanto la información de la imagen (misma interfaz que \texttt{cameraserver}), como el Pose3D (posición y orientación del robot) 
+y otras informaciones como pueden ser el láser por ejemplo (Laser). También se pueden enviar órdenes como 
+la velocidad (Motors). En la figura \ref{fig:esq_kobuki} se refleja este funcionamiento.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=1\textwidth]{./img/esq_kobuki.png}
+\caption{Ejemplo del uso del Kobuki.} \label{fig:esq_kobuki}
+\end{figure}
+
+
+\section{HTML5}
+
+HTML5\cite {html5} (HyperText Markup Language, versión 5) es la quinta revisión importante del lenguaje básico de la \textit{World Wide Web}, HTML. HTML5 especifica dos variantes de sintaxis para HTML: 
+una «clásica», HTML (text/html), conocida como HTML5, y una variante XHTML conocida como sintaxis XHTML5 que deberá servirse con sintaxis XML (application/xhtml+xml).
+Esta es la primera vez que HTML y XHTML se han desarrollado en paralelo. La versión definitiva de la quinta revisión del estándar se publicó en octubre de 2014\footnote{Estándar: \url{http://www.w3.org/TR/html5/}}.
+
+HTML5 establece una serie de nuevos elementos y atributos que reflejan el uso típico de los sitios web modernos.
+El desarrollo de este lenguaje de marcado es regulado por el Consorcio W3C\footnote{web de W3C: \url{http://www.w3.org/}}.
+
+Algunos de los nuevos elementos introducidos son: \texttt{video} (permite reproducir vídeos sin la necesidad de \textit{plugins Flash}), \texttt{canvas} (Puede usarse para dibujar gráficos a través JavaScript), 
+\texttt{header} (representa la cabecera de la web, donde normalmente está el menú), 
+\texttt{progress} (permite mostrar una barra de progreso). En el siguiente código se puede ver la etiqueta vídeo necesaria para el vídeo representado en la figura \ref{fig:htmlvideo}
+\lstset{language=html}
+\begin{lstlisting}
+ <video style="width: 640px; height: 360px; left: 0px; top: 0px; transform: none;" class="video-stream html5-main-video" src="mediasource:https://www.youtube.com/54e5cca1-7aef-4865-ae1b-baab9047b526"></video>
+\end{lstlisting}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/htmlvideo.png}
+\caption{Vídeo en Youtube.} \label{fig:htmlvideo}
+\end{figure}
+
+Nosotros usamos varios ingredientes asociados a HTML5 como son: \texttt{Canvas, WebWorkers y WebSockets}.
+\subsection{Canvas}
+ Consiste en una región dibujable definida en el código HTML con atributos de altura y ancho. El código JavaScript puede acceder a la zona a 
+ través de un conjunto completo de funciones similares a las de otras APIs comunes de dibujo 2D, 
+ permitiendo así que los gráficos sean generados dinámicamente. Algunos de los usos previstos incluyen construcción de gráficos, animaciones, juegos, y la composición de imágenes.
+ 
+ Canvas fue introducido inicialmente por Apple para su uso dentro de su propio componente de Mac OS X surgido en 2004, para empujar aplicaciones como \textit{widgets} de \textit{Dashboard} y 
+ el navegador Safari. Más tarde, en 2005, se adoptó en la versión 1.8 de los navegadores Firefox y Ópera en 2006. Fue estandarizado por el Grupo de Trabajo de Tecnología de Aplicación de hipertexto Web\footnote{web de WHATWG: \url{https://whatwg.org/}} 
+ (WHATWG) sobre las nuevas especificaciones propuestas para tecnologías web de última generación. En la tabla \ref{tab:canvassupport} se puede ver desde qué versión de los diferentes navegadores se soporta Canvas.
+ 
+ \begin{table}[]
+\centering
+\label{tab:canvassupport}
+\begin{tabular}{|l|l|l|c|l|l|c|c|c|}
+\hline
+\rowcolor{gray} 
+{\color{White} IE} & {\color{White} Edge} & {\color{White} Firefox} & {\color{White} Chrome} & {\color{White} Safari} & {\color{White} Opera} & {\color{White} IOS Safari} & {\color{White} \begin{tabular}[c]{@{}c@{}}Android\\ Browser\end{tabular}} & {\color{White} \begin{tabular}[c]{@{}c@{}}Chrome\\ For Android\end{tabular}} \\ \hline
+9                         & 12                          & 3.6                            & 4                             & 4                             & 10.1                         & 3.2                               & 3                                                                                & 7                                                                                   \\ \hline
+\end{tabular}
+\caption{Soporte de Canvas}
+\end{table}
+
+Nosotros lo utilizamos tanto para visualizar las imágenes recibidas de las cámaras como para mostrar los modelos 3D de los robots.
+\subsection{WebWorker}
+
+Uno de los mayores problemas que tienen las aplicaciones web es que JavaScript es un entorno de subproceso único, es decir, que no se pueden ejecutar varias secuencias de comandos al mismo tiempo. 
+Los desarrolladores imitaban la ``simultaneidad'' utilizando técnicas como \texttt{setTimeout()} o \texttt{setInterval()} que lo único que hacen es programas la ejecución de una función, pero se sigue ejecutando sólo una función cada vez.
+
+
+Los \textbf{WebWorkers} proveen un medio sencillo para que el contenido web ejecute \textit{scripts} en hilos en segundo plano. El hilo \textit{worker} puede realizar tareas sin interferir con la interfaz de usuario. 
+No tienen acceso al DOM (Document Object Model es un conjunto de utilidades diseñadas para manipular documentos HTML de forma rápida y eficiente) ni a otras zonas sensibles para evitar problemas de concurrencia (en la figura  \ref{fig:webworker} se pueden ver los elementos a los que tiene acceso cada hilo), por lo que el intercambios de información entre \textit{Worker} e hilo principal se hace mediante paso de mensajes.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.3\textwidth]{../traspas/img/worker.png}
+\caption{Elementos WebWorker.} \label{fig:webworker}
+\end{figure}
+
+En la tabla \ref{tab:workersupport} se puede ver desde qué versión de los diferentes navegadores se soporta WebWorker.
+
+ \begin{table}[]
+\centering
+\label{tab:workersupport}
+\begin{tabular}{|l|l|l|c|l|l|c|c|c|}
+\hline
+\rowcolor{gray} 
+{\color{White} IE} & {\color{White} Edge} & {\color{White} Firefox} & {\color{White} Chrome} & {\color{White} Safari} & {\color{White} Opera} & {\color{White} IOS Safari} & {\color{White} \begin{tabular}[c]{@{}c@{}}Android\\ Browser\end{tabular}} & {\color{White} \begin{tabular}[c]{@{}c@{}}Chrome\\ For Android\end{tabular}} \\ \hline
+10                         & 12                          & 3.5                            & 4                             & 4                             & 11.5                         & 5.1                               & 4.4                                                                                & 47                                                                                   \\ \hline
+\end{tabular}
+\caption{Soporte para WebWorker}
+\end{table}
+\subsection{WebSocket}
+\texttt{WebSocket} es una tecnología que proporciona un canal de comunicación bidireccional y \textit{full-duplex} sobre un único \textit{socket} TCP. 
+Está diseñada para ser implementada en navegadores y servidores web, pero puede utilizarse por cualquier aplicación cliente/servidor. 
+La API de \textit{WebSocket} está siendo normalizada por el W3C\footnote{\url{http://www.w3.org}}. Debido a que las conexiones TCP comunes sobre puertos diferentes al 80 son 
+habitualmente bloqueadas por los administradores de redes, el uso de esta tecnología proporcionaría una solución a este tipo de limitaciones 
+proveyendo una funcionalidad similar a la apertura de varias conexiones en distintos puertos, pero multiplexando diferentes servicios \textit{WebSocket} 
+sobre un único puerto TCP (a costa de una pequeña sobrecarga del protocolo).
+
+En la tabla \ref{tab:socketsupport} se puede ver desde qué versión de los diferentes navegadores se soporta WebWorker.
+ \begin{table}[]
+\centering
+\label{tab:socketsupport}
+\begin{tabular}{|l|l|l|c|l|l|c|c|c|}
+\hline
+\rowcolor{gray} 
+{\color{White} IE} & {\color{White} Edge} & {\color{White} Firefox} & {\color{White} Chrome} & {\color{White} Safari} & {\color{White} Opera} & {\color{White} IOS Safari} & {\color{White} \begin{tabular}[c]{@{}c@{}}Android\\ Browser\end{tabular}} & {\color{White} \begin{tabular}[c]{@{}c@{}}Chrome\\ For Android\end{tabular}} \\ \hline
+10                         & 12                          & 11                            & 16                             & 7                             & 12.1                         & 6.1                               & 4.4                                                                                & 47                                                                                   \\ \hline
+\end{tabular}
+\caption{Soporte para WebSocket}
+\end{table}
+\section{CSS3}
+
+Hoja de estilo en cascada o CSS (\textit{cascading style sheets}) es un lenguaje usado para definir y crear la presentación de un documento estructurado escrito en HTML. El \textit{World Wide Web Consortium}\footnote{web de W3C: \url{http://www.w3.org/}} 
+es el encargado de formular la especificación de las hojas de estilo que servirán de estándar para los agentes de usuario o navegadores.
+
+La idea que se encuentra detrás del desarrollo de CSS es separar la estructura de un documento de su presentación. La información de estilo puede ser definida 
+en un documento separado o en el mismo documento HTML. En este último caso podrían definirse estilos generales con el elemento «style» o en cada etiqueta particular mediante el atributo «style».
+
+CSS tiene una sintaxis muy sencilla, que usa unas cuantas palabras clave tomadas del inglés para especificar los nombres de varias propiedades de estilo, por ejemplo, \textit{width} o \textit{bottom-padding}.
+
+A diferencia de las versiones anteriores, CSS3 está dividida en varios documentos separados, llamados ``módulos''. 
+Cada módulo añade nuevas funcionalidades a las definidas en CSS2, de manera que se preservan las anteriores para mantener la compatibilidad.
+
+Nosotros lo usamos para modificar la apariencia de la página web a nuestro gusto.
+
+\section{JavaScript6}
+
+JavaScript6 o ECMAScript 2015 es la versión actual de la especificación del lenguaje ECMAScript conocida simplemente como ``ES6''.
+
+Agrega cambios significativos en la sintaxis para escribir aplicaciones complejas, incluyendo clases y módulos, definiéndolos sémanticamente en 
+los mismos términos del modo estricto de la edición ECMAScript 5. Otras nuevas características incluyen iteradores \texttt{for/of loops}, generadores
+expresiones estilo Python, funciones de dirección, datos binarios, colecciones (mapas, sets, mapas débiles) y \textit{proxies} (metaprogramación para objetos virtuales y \textit{wrappers}). 
+
+El nuevo ingrediente de JavaScript6 que se utiliza en este TFG es el objeto \textit{Promise}, que devuelve una promesa de tener un valor en algún momento en el futuro.
+
+\subsection{Promise}
+
+La interfaz \textit{Promise} representa un \textit{proxy} para un valor no necesariamente conocido cuando se crea la promesa. Permite asociar manejadores a un eventual éxito o 
+fracaso de acciones asíncronas. Esto permite que los métodos asíncronos devuelven valores como métodos síncronos: en lugar del valor final, el método asíncrono 
+devuelve una promesa de tener un valor en algún momento en el futuro.
+
+Una Promesa puede estar en uno de estos estados:
+\begin{itemize}
+ \item \textit{Pending}: estado inicial, no cumplida o rechazada.
+ \item \textit{Fulfilled}: operación satisfactoria.
+ \item \textit{Rejected}: operación fallida.
+\end{itemize}
+
+Una promesa pendiente puede llegar a ser cumplida con un valor o rechazada con una razón. Cuando cualquiera de ellas sucede, los manejadores asociados 
+se llaman mediante el método \texttt{then} de la promesa. (Si la promesa ya se ha cumplido o rechazado cuando se conecta un controlador correspondiente, el manejador será llamado, 
+así que no hay condición de competencia entre el final de una operación asíncrona y sus manejadores). En la figura \ref{fig:promise} pueden los estados y como se pasa a ellos.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{../traspas/img/promise-tilstande1.png}
+\caption{Vida de una Promise} \label{fig:promise}
+\end{figure}
+
+En la tabla \ref{tab:pormisesupport} se puede ver desde qué versión de los diferentes navegadores se soporta Promise.
+
+ \begin{table}[]
+\centering
+\label{tab:pormisesupport}
+\begin{tabular}{|l|l|l|c|l|l|c|c|c|}
+\hline
+\rowcolor{gray} 
+{\color{White} IE} & {\color{White} Edge} & {\color{White} Firefox} & {\color{White} Chrome} & {\color{White} Safari} & {\color{White} Opera} & {\color{White} IOS Safari} & {\color{White} \begin{tabular}[c]{@{}c@{}}Android\\ Browser\end{tabular}} & {\color{White} \begin{tabular}[c]{@{}c@{}}Chrome\\ For Android\end{tabular}} \\ \hline
+no soportado                         & 12                          & 29                            & 33                             & 7.1                             & 20                         & 8                               & 4.4.4                                                                                & 47                                                                                   \\ \hline
+\end{tabular}
+\caption{Soporte para Promise}
+\end{table}
+
+\section{WebGL}
+
+WebGL\cite{webgl} es una especificación estándar, basada en OpenGL ES 2.0, que está siendo desarrollada actualmente para mostrar gráficos en 3D en navegadores web. 
+Permite mostrar gráficos en 3D acelerados por hardware (GPU) en páginas web, sin la necesidad de \textit{plugins} en cualquier plataforma que soporte OpenGL 2.0 u OpenGL ES 2.0.
+
+WebGL carece de las rutinas matemáticas matriz eliminadas en OpenGL 3.0. Esta funcionalidad debe ser proporcionada por el usuario; 
+este código necesario se complementa con frecuencia con una biblioteca de matrices tal como glMatrix, TDL, o MJS.
+
+Como WebGL es una tecnología diseñada para trabajar directamente con la GPU (unidad de procesamiento gráfico) es difícil de codificar en comparación con otros estándares web más accesibles, 
+por lo que ha surgido muchas bibliotecas JavaScript para resolver este problema:  Curve3D, CubicVR, EnergizeGL, O3D,  TDL, Three.js, X3DOM. BabylonJS...
+
+Las más destacadas son Three.js,  que es la más usada y con la que se trabaja en este proyecto, y BabylonJS que está desarrollada por Microsoft.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.7\textwidth]{../traspas/img/canvas2.png}
+\caption{Ejemplo mundo WebGl con Three.js.} \label{fig:webgl}
+\end{figure}
+
+Nosotros la usamos para crear los modelos 3D de los robots.
+\section{ThreeJS}
+
+Three.js\cite{threejs} es una biblioteca escrita en JavaScript para crear y mostrar gráficos animados por ordenador en 3D en un navegador Web 
+y puede ser utilizada en conjunción con el elemento canvas de HTML5, SVG ó WebGL. Es la más usada para crear animaciones con WebGL (figura \ref{fig:webgl}).
+
+Características:
+\begin{itemize}
+\item Renderizadores: Canvas, SVG y WebGL.
+\item Efectos: anaglifo, bizco y la barrera de paralaje.
+\item Escenas: añadir y eliminar objetos en tiempo de ejecución; niebla.
+\item Cámaras: perspectiva y ortográfica; controladores: trackball, FPS, trayectoria y otras.
+\item Animación: armaduras, cinemática directa, cinemática inversa,\textit{ morphing} y fotogramas clave.
+\item Luces: ambiente, dirección, luz de puntos y espacios, sombras: emite y recibe.
+\item Materiales: Lambert, Phong, sombreado suave, texturas y otras.
+\item Shaders: el acceso a las capacidades del OpenGL \textit{Shading Language} (GLSL): reflejos en la lente, pase profundo y una extensa biblioteca de post-procesamiento
+\item Objetos: mallas, partículas, \textit{sprites}, líneas, cintas, huesos y otros.
+\item Geometría: plano, cubo, esfera, toroide, texto en 3D y otras; modificadores: torno, extrusión y tubo.
+\item Cargadores de datos: binario, imagen, JSON y escena.
+\item Utilidades: conjunto completo de funciones matemáticas en 3D, incluyendo tronco, matriz Quaternian, UVs y otras.
+\end{itemize}
+
+Incluso están añadiendo funciones para realidad virtual.
+
+Nosotros la usamos para facilitar el acceso a WebGL.
+\section{JQuery}
+
+jQuery\cite{jquery} es una biblioteca de JavaScript que permite simplificar la manera de interactuar con los documentos HTML, manipular el árbol DOM, manejar eventos, desarrollar animaciones y agregar interacción con la técnica AJAX a páginas web. 
+
+Es la biblioteca de JavaScript más utilizada y ofrece una serie de funcionalidades que de otra manera requerirían de mucho más código por lo que se ahorra tiempo y espacio.
+
+Características:
+\begin{itemize}
+\item Selección de elementos DOM.
+\item Interactividad y modificaciones del árbol DOM, incluyendo soporte para CSS 1-3 y un \textit{plugin} básico de XPath.
+\item Eventos.
+\item Manipulación de la hoja de estilos CSS.
+\item Efectos y animaciones.
+\item Animaciones personalizadas.
+\item AJAX.
+\item Soporta extensiones.
+\item Utilidades varias como obtener información del navegador, operar con objetos y vectores, funciones para rutinas comunes, etc.
+\item Compatible con los navegadores Mozilla Firefox 2.0+, Internet Explorer 6+, Safari 3+, Opera 10.6+ y Google Chrome 8+.
+
+La versión utilizada en el proyecto es la 1.11.3.
+\end{itemize}
+
+En la tabla \ref{tab:jquery} se puede ver una comparativa entre JQuery y los métodos por defecto de JavaScript.
+
+\begin{table}[]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\rowcolor{gray} 
+\multicolumn{1}{|c|}{\color{White} JQuery}                                                                 & \multicolumn{1}{c|}{ \color{White} JavaScript}                                                                                                                                                                 \\ \hline
+var divs = \$(``div'');                                                                        & var divs = document.querySelectorAll (``div'');                                                                                                                                                   \\ \hline
+var newDiv = \$(``$<$div/$>$'');                                                & var newDiv = document.createElement(``div'');                                                                                                                                                     \\ \hline
+\begin{tabular}[c]{@{}l@{}}\$(``a'').click (function(\{\\    //code\\ \});\end{tabular}        & \begin{tabular}[c]{@{}l@{}}{[} {]}.forEach.call (document.querySelectorAll (``a''),function (el)\{  \\    el.addEventListener (``click'',function()\{\\       //code  \\    \});\\ \});\end{tabular} \\ \hline
+\end{tabular}
+\label{tab:jquery}
+\caption{Comparación JQuery, JavaScript}
+\end{table}
+
+\section{Bootstrap}
+
+Bootstrap\cite{bootstrap} es un \textit{framework} o conjunto de herramientas de software libre para diseño de sitios y aplicaciones web. 
+Contiene plantillas de diseño con tipografía, formularios, botones, cuadros, menús de navegación y otros elementos de diseño 
+basado en HTML y CSS, así como extensiones de JavaScript opcionales adicionales.
+
+Bootstrap fue desarrollado por Mark Otto y Jacbod Thornton de Twitter, como un marco de trabajo para fomentar la consistencia a través de herramientas internas. 
+Antes de Bootstrap, se usaban varias librerías para el desarrollo de interfaces de usuario, las cuales guiaban a inconsistencias y a una carga de trabajo alta en su mantenimiento.
+
+En agosto del 2011, Twitter liberó a Bootstrap como código abierto. En febrero del 2012, se convirtió en el proyecto de desarrollo más popular de GitHub y es usado por la NASA (figura \ref{fig:nasa}), la universidad de Washington, la FIFA...
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.7\textwidth]{./img/nasa.jpg}
+\caption{Web de la NASA.} \label{fig:nasa}
+\end{figure}
+
+En este proyecto se usa la versión 3 para la maquetación de la página web.
+
+
+\section{ICE for Javascript}
+
+ICE for Javascript o Ice-JS\cite{icejs}, es una nueva implementación de ICE adaptada para aplicaciones web que usan JavaScript. 
+Como los navegadores web no pueden usar los protocolos comunes de ICE, sino que sólo pueden usar \textit{websocket}\cite{icews}, 
+incluye un \textit{plugin} para procesos en C++ que les permite usar este protocolo. Un esquema del funcionamiento de Ice-JS se encuentra en la figura \ref{fig:icejsapp}.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{./img/icejsapp.png}
+\caption{Esquema de funcionamiento de Ice-JS.} \label{fig:icejsapp}
+\end{figure}
+
+En la versión 3.5 de ICE todavía era una beta y estaba aparte\footnote{descarga de Ice-JS \url{https://zeroc.com/labs/icejs/download.html}}, 
+pero ya en la 3.6 está totalmente incluida en el paquete general de ICE. En este proyecto se usa la versión beta.
+
+
+
+
+
+
+
+
+

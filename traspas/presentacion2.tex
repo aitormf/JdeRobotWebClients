@@ -1,0 +1,540 @@
+\documentclass[notes,slidesec,a4]{seminar}
+\usepackage[spanish]{babel}
+\usepackage[latin1]{inputenc}
+
+\usepackage{t-gsyc-6}
+\usepackage{fancybox}
+\usepackage{graphics}
+\usepackage{moreverb}
+\usepackage{alltt}
+\usepackage{html}
+\usepackage{hthtml}
+\usepackage{color}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{amsmath}
+\usepackage[normalsize]{subfigure}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{listings}
+
+
+\title{TECNOLOGÍAS WEB EN ROBÓTICA}
+\author{Aitor Martínez Fernández}
+
+\cop{Aitor Martínez Fernández}
+\address{a.martinezfern@alumnos.urjc.es}
+
+\begin{document}
+\maketitle
+
+%%--------------------------------------------------------------
+
+\begin{hslide}
+\slsect{Índice}
+\begin{itemize}
+\item Introducción 
+\item Objetivos
+\item Infraestructura
+\item Diseño e implementación
+\item Conclusiones
+\end{itemize}
+\end{hslide}
+
+%%--------------------------------------------------------------
+\begin{hslide}
+\slsect{Introducción}
+\slsubsect{Robótica}
+\begin{minipage}[t]{0.5\textwidth}
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.6\textwidth]{img/coche_google.jpg}
+%\href{/home/kasillas77/Vídeos/baxter.mp4}{\includegraphics[width=0.6\textwidth]{img/robot_industrial.jpg}}
+\includegraphics[width=0.6\textwidth]{img/robot_industrial.jpg}
+\end{figure}
+\end{center}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.6\textwidth]{img/segway.png}
+\includegraphics[width=0.6\textwidth]{img/kobuki.jpg}
+\end{figure}
+\end{center}
+\end{minipage}
+\end{hslide}
+
+%%--------------------------------------------------------------
+\begin{hslide}
+\slsubsect{Web}
+\begin{minipage}[t]{0.5\textwidth}
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.9\textwidth]{img/maps.png}
+\includegraphics[width=0.9\textwidth]{img/facebook-9.png}
+\end{figure}
+\end{center}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.9\textwidth]{img/elpais.png}
+\includegraphics[width=0.9\textwidth]{img/netflix.png}
+\end{figure}
+\end{center}
+\end{minipage}
+\end{hslide}
+
+
+%%--------------------------------------------------------------
+%\begin{hslide}
+%\slsubsect{Antecedentes}
+%\begin{itemize}
+%\item JdeRobot: Es una plataforma de desarrollo de aplicaciones orientadas a la robótica,
+%domótica y visión artificial desarrollada por el grupo de Robótica de la URJC.
+%\item ICE: Permite comunicaciones cross-language y cross-platform.
+%\end{hslide}
+
+\begin{hslide}
+\slsubsect{Antecedentes: Surveillance 4.0}
+
+\begin{itemize}
+\item Es el Proyecto fin de carrera de Daniel Castellano.
+\item Está desarrollado con Django (Python).
+\item Un servidor web intermedio se conecta a los servidores ICE.
+\end{itemize}
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=\textwidth]{img/surveillance4.png}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=\textwidth]{img/Esquema_s4.png}
+\end{minipage}
+\end{hslide}
+
+\begin{hslide}
+\slsubsect{Antecedentes: Surveillance 5.1}
+\begin{itemize}
+\item Es el TFG de Edgar Barrero.
+\item Está desarrollado con Ruby on Rails.
+\item Un servidor web intermedio se conecta a los servidores ICE.
+\end{itemize}
+\begin{minipage}[t]{0.3\textwidth}
+\includegraphics[width=\textwidth]{img/surveillance5.png}
+\end{minipage}
+\begin{minipage}[t]{0.7\textwidth}
+\includegraphics[width=\textwidth]{img/esquema_s5.png}
+\end{minipage}
+\end{hslide}
+
+%%--------------------------------------------------------------
+
+\begin{hslide}
+\slsect{Objetivo}
+Crear versiones web de varios clientes 
+de JdeRobot muy utilizados sin tener servidor intermedio, permitiéndo tener versiones multiplataforma con un único desarrollo. 
+
+Sub-objetivos:
+\begin{itemize}
+\item Representación de datos de sensores: CameraView, RgbdViewer
+\item Interactuación con actuadores: KobukiViewer, UavViewer
+\item Añadir lógica que interprete los datos de los sensores y mande órdenes a los actuadores
+\item Diseño de la página web
+\end{itemize}
+
+\end{hslide}
+
+%%--------------------------------------------------------------
+\begin{hslide}
+\slsect{Infraestructura}
+\slsubsect{Gazebo e ICE}
+\begin{itemize}
+\item \textbf{Gazebo}: Simula sensores, actuadores, robots, drones,... en mundos virtuales.
+\item \textbf{ICE}: Permite comunicaciones \textit{cross-language} y \textit{cross-platform}.
+\end{itemize}
+
+\begin{minipage}[t]{0.5\textwidth}
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.8\textwidth]{../memoria/img/gazebo-sample.png}
+\end{figure}
+\end{center}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.9\textwidth]{img/ejemplo-ice.png}
+\end{figure}
+\end{center}
+\end{minipage}
+\end{hslide}
+
+%%--------------------------------------------------------------
+\begin{hslide}
+\slsubsect{HTML5 y WebWorker}
+\begin{minipage}[t]{0.7\textwidth}
+\begin{itemize}
+\item \textbf{HTML5}: Establece una serie de nuevos elementos y atributos que reflejan el uso típico de los sitios web modernos (Canvas, Video,...).
+%\item WebWorker: Proveen un medio sencillo para que el contenido web ejecute scripts en hilos en segundo plano. Permite realizar tareas sin interferir con la interfaz de usuario y para comunicar el 
+%hilo principal con estos se hace mediante paso de mensajes.
+\item \textbf{WebWorker}: Permite ejecutar scripts en segundo plano sin interferir con la interfaz de usuario.
+\end{itemize}
+\lstset{language=html}
+\begin{lstlisting}
+ <video src=" "></video>
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}[t]{0.3\textwidth}
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.8\textwidth]{img/worker.png}
+\end{figure}
+\end{center}
+\end{minipage}
+\end{hslide}
+
+%%--------------------------------------------------------------
+\begin{hslide}
+\slsubsect{WebGL y Canvas en HTML5}
+\begin{itemize}
+\item \textbf{WebGL}: Permite mostrar gráficos en 3D acelerados por hardware (GPU) en páginas web sin la necesidad de plug-ins.
+\item \textbf{Canvas}: Puede usarse para dibujar gráficos a través JavaScript. 
+Por ejemplo, hacer composición de fotos, crear animaciones e incluso procesamiento de vídeo en tiempo real.
+\end{itemize}
+\begin{minipage}[t]{0.5\textwidth}
+\begin{center}
+\begin{figure}
+\href{http://www.yvoschaap.com/chainrxn/}{\includegraphics[width=\textwidth]{img/canvas-9.jpg}}
+\end{figure}
+\end{center}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+\begin{center}
+\begin{figure}
+\href{http://threejs.org/examples/#misc_controls_fly}{\includegraphics[width=\textwidth]{img/canvas2.png}}
+\end{figure}
+\end{center}
+\end{minipage}
+\end{hslide}
+%%--------------------------------------------------------------
+\begin{hslide}
+\slsubsect{Javascript 6 y Promesas}
+\begin{itemize}
+\item \textbf{JavaScript6 o ECMAScript 2015}: es la versión actual de la especificación del lenguaje ECMAScript conocida simplemente como ``ES6''.
+\item \textbf{Promise}: Devuelve una promesa de tener un valor en algún momento en el futuro.
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.8\textwidth]{img/promise-tilstande1.png}
+\end{figure}
+\end{center}
+\end{hslide}
+
+%%--------------------------------------------------------------
+\begin{hslide}
+\slsubsect{JQuery y Bootstrap}
+\begin{itemize}
+\item \textbf{JQuery}: es una biblioteca de JavaScript, que permite simplificar la manera de interactuar con los documentos HTML, manejar eventos,...
+\item \textbf{Bootstrap}: conjunto de herramientas de software libre para diseño de sitios y aplicaciones web.
+\end{itemize}
+
+\begin{minipage}[t]{0.7\textwidth}
+\begin{center}
+\begin{figure}
+\includegraphics[width=\textwidth]{img/jquery.png}
+\end{figure}
+\end{center}
+\end{minipage}
+\begin{minipage}[t]{0.3\textwidth}
+\begin{center}
+\begin{figure}
+\href{http://getbootstrap.com/}{\includegraphics[width=\textwidth]{img/bootstrap.png}}
+\end{figure}
+\end{center}
+\end{minipage}
+\end{hslide}
+
+%%---------------------------------------------------------------
+
+\begin{hslide}
+\slsect{Diseño e implementación}
+\begin{center}
+\begin{figure}
+\includegraphics[width=8.5cm]{img/esq_proyecto.png}
+\end{figure}
+\end{center}
+\end{hslide}
+
+%%---------------------------------------------------------------
+
+%\begin{hslide}
+%\slsubsect{Atención estática Log-Polar}
+%\begin{center}
+%\begin{figure}
+%\includegraphics[height=3.0cm]{img/img_cartesiana}
+%\includegraphics[height=3.0cm]{img/img_retina}
+%\\
+%\vspace{0.2cm}
+%\includegraphics[height=3.0cm]{img/img_logpolar}
+%\end{figure}
+%\end{center}
+%\end{hslide}
+
+%%---------------------------------------------------------------
+\begin{hslide}
+\slsubsect{CameraViewJS}
+
+\begin{center}
+Este cliente muestra la informacion recibida de una webcam.
+\begin{figure}
+\includegraphics[width=0.9\textwidth]{img/esq_cameraviewjs.png}
+\end{figure}
+\end{center}
+\end{hslide}
+
+%%---------------------------------------------------------------
+\begin{hslide}
+\slsubsect{CameraViewJS}
+\begin{minipage}{6cm}
+\begin{itemize}
+ \item Cuando se pone en funcionamiento, se incian los widgets y se crea el WebWorker
+ \item Mediante una promesa se espera a tener establecida la conexión con el servidor
+ \item Cada vez que se recibe una imagen se muestra en el canvas
+\end{itemize}
+\end{minipage} \hfill
+\begin{minipage}{6cm}
+\begin{center}
+\begin{figure}
+\includegraphics[width=5cm]{img/cameraview.png}
+\includegraphics[width=5.6cm]{img/mensajes_cameraview.png}
+\end{figure}
+\end{center}
+\end{minipage}
+\end{hslide}
+
+%%---------------------------------------------------------------
+%\begin{hslide}
+%\slsubsect{CameraViewJS}
+%\begin{minipage}{6cm}
+%\begin{center}
+%\begin{figure}
+%\includegraphics[width=5cm]{img/surveillance5.png}
+%\end{figure}
+%\end{center}
+%\begin{enumerate}
+% \setcounter{enumi}{2}
+% \item Se inicia el Streaming de video
+%\item Cada vez que se recibe una imagen se muestra en el canvas
+%\end{enumerate}
+%\end{minipage} \hfill
+%\begin{minipage}{6cm}
+
+%\begin{enumerate}
+%\item Se incian los widgets y se crean los WebWorkers
+%\item Mediante una promesa se espera a tener establecida la conexión con el servidor
+%\end{enumerate}
+%\begin{center}
+%\begin{figure}
+%\includegraphics[width=5.9cm]{img/mensajes_cameraview.png}
+%\end{figure}
+%\end{center}
+%\end{minipage}
+%\end{hslide}
+
+%%---------------------------------------------------------------
+\begin{hslide}
+\slsubsect{RgbdViewerJS}
+\begin{minipage}{5cm}
+\begin{center}
+\begin{figure}
+\includegraphics[width=5cm]{img/rgbdviewer.png}
+\includegraphics[width=5cm]{./img/esq_rgbdviewerjs.png}
+\end{figure}
+\end{center}
+\end{minipage} \hfill
+\begin{minipage}{6cm}
+Recibe información de un sensor Kinect
+\begin{itemize}
+\item Imágenes como en CameraViewJS
+\item Cuando se han recibido imágenes de las dos cámaras se crea la nube de puntos y se muestra en el modelo 3D 
+\end{itemize}
+\end{minipage}
+\end{hslide}
+
+%%---------------------------------------------------------------
+%\begin{hslide}
+%\slsubsect{RgbdViewerJS}
+%\begin{minipage}{5cm}
+%\begin{center}
+%\begin{figure}
+%\includegraphics[width=5cm]{img/surveillance5.png}
+%\includegraphics[width=5cm]{./img/esq_rgbdviewerjs.png}
+%\end{figure}
+%\end{center}
+%\end{minipage} \hfill
+%\begin{minipage}{6cm}
+%Recibe información de un sensor Kinect
+%\begin{enumerate}
+%\item Se incian los widgets y se crean los WebWorkers
+%\item Mediante una promesa se espera a tener establecida la conexión con el servidor
+%\item Se inician los Streamings de video, las imagenes se tratan igual que en CameraViewJS
+%\item Cuando se han recibido imagenes de las dos cámaras se crea la nube de puntos y se muestra en el modelo 3D
+%\end{enumerate}
+%\end{minipage}
+%\end{hslide}
+
+%%---------------------------------------------------------------
+\begin{hslide}
+\slsubsect{KobukiViewerJS}
+
+\begin{center}
+Este cliente permite teleoperar un robot.
+\begin{figure}
+\includegraphics[width=5.9cm]{img/esq_kobukiviewer.png}
+\end{figure}
+\end{center}
+\end{hslide}
+
+%%---------------------------------------------------------------
+\begin{hslide}
+\slsubsect{KobukiViewerJS}
+\begin{minipage}{5cm}
+\begin{center}
+\begin{figure}
+\includegraphics[width=5cm]{img/kobukiviewer.png}
+\includegraphics[width=5cm]{./img/mensajes_motors.png}
+\end{figure}
+\end{center}
+\end{minipage} \hfill
+\begin{minipage}{6cm}
+\begin{itemize}
+\item Imágenes como en CameraViewJS.
+\item Cada vez que se recibe un Pose3D se modifica la posición y orientación del robot en el modelo 3D.
+\item Cuando se recibe información del laser se cre una imagen 2D y otra 3D para poderla agregar al modelo.
+\item Cada vez que se mueve el control se envían las órdenes de velocidad.
+\end{itemize}
+\end{minipage}
+\end{hslide}
+
+%%---------------------------------------------------------------
+%\begin{hslide}
+%\slsubsect{KobukiViewerJS}
+%\begin{minipage}{6cm}
+%\begin{center}
+%\begin{figure}
+%\includegraphics[width=5cm]{img/surveillance5.png}
+%\end{figure}
+%\end{center}
+%\begin{enumerate}
+% \setcounter{enumi}{2}
+% \item Se inician los Streamings de los sensores
+%\item Cada vez que se reciben los datos se muestran en sus Respectivos Widgets
+%\item Cada vez que se mueve el control se envían velocidades a los motores
+%\end{enumerate}
+%\end{minipage} \hfill
+%\begin{minipage}{6cm}
+
+%\begin{enumerate}
+%\item Se incian los widgets y se crean los WebWorkers
+%\item Mediante promesas se espera a tener establecidas las conexiones con el servidor
+%\end{enumerate}
+%\begin{center}
+%\begin{figure}
+%\includegraphics[width=5.9cm]{img/mensajes_motors.png}
+%\end{figure}
+%\end{center}
+%\end{minipage}
+%\end{hslide}
+
+
+%%---------------------------------------------------------------
+\begin{hslide}
+\slsubsect{UavViewerJS}
+\begin{minipage}{5cm}
+\begin{center}
+\begin{figure}
+\includegraphics[width=5cm]{img/uavviewer.png}
+\includegraphics[width=4.7cm]{./img/esq_uavviewer.png}
+\end{figure}
+\end{center}
+\end{minipage} \hfill
+\begin{minipage}{6cm}
+\begin{itemize}
+\item Imágenes como en CameraViewJS.
+\item Cada vez que se recibe un Pose3D se modifica la posición y orientación del drone en el modelo 3D y se modifican los indicadores de vuelo.
+\item Cada vez que se mueven los controles se envían las órdenes de velocidad al drone.
+\item Cuando se pulsan los botones se envían al drone las órdenes de despegar, aterrizar,...
+\end{itemize}
+\end{minipage}
+\end{hslide}
+
+%%---------------------------------------------------------------
+%\begin{hslide}
+%\slsubsect{UavViewerJS: Funcionamiento}
+%\begin{minipage}{5cm}
+%begin{center}
+%\begin{figure}
+%\includegraphics[width=5cm]{img/surveillance5.png}
+%\end{figure}
+%\end{center}
+%\end{minipage} \hfill
+%\begin{minipage}{6cm}
+
+%\begin{enumerate}
+%\item Se incian los widgets y se crean los WebWorkers.
+%\item Mediante promesas se espera a tener establecidas las conexiones con el servidor.
+%\item Se inician los Streamings de los sensores.
+%\item Cada vez que se reciben los datos se muestran en sus Respectivos Widgets.
+%\item Cada vez que se mueven los controles se envían velocidades a los motores.
+%\end{enumerate}
+%\end{minipage}
+%\end{hslide}
+
+%%---------------------------------------------------------------
+\begin{hslide}
+\slsubsect{IntrorobKobukiJS}
+\begin{itemize}
+\item Igual que KobukiViewerJS pero añadiendo comportamiento autónomo, mediante los datos recibidos por los sensores, una función programada en JS decide qué señales enviar a los actuadores.
+\end{itemize}
+\begin{center}
+\begin{minipage}[t]{0.3\textwidth}
+\includegraphics[width=\textwidth]{img/introrobkobuki.png}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=\textwidth]{img/esq_introrobkobuki.png}
+\end{minipage}
+\end{center}
+\end{hslide}
+
+%%---------------------------------------------------------------
+\begin{hslide}
+\slsubsect{IntrorobUavJS}
+\begin{itemize}
+\item Igual que UavViewerJS pero añadiendo comportamiento autónomo, mediante los datos recibidos por los sensores, una función programada en JS decide qué señales enviar a los actuadores.
+\end{itemize}
+\begin{center}
+\begin{minipage}[t]{0.4\textwidth}
+\includegraphics[width=\textwidth]{img/introrobuav.png}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+\includegraphics[width=\textwidth]{img/esq_introrobuav.png}
+\end{minipage}
+\end{center}
+\end{hslide}
+
+%%---------------------------------------------------------------
+\begin{hslide}
+\slsect{Conclusiones}
+\begin{itemize}
+\item \textbf{Objetivo cumplido}: versiones web de las herramientas para ver sensores y teleoperar robots.
+\item Son multitplataforma (valen para teléfonos, tabletas, ordenadores, portátiles...)
+\item Manejan tecnologías web como WebGL, ICE-JS....
+\end{itemize}
+Líneas futuras:
+\begin{itemize}
+\item Versiones en NodeJS
+\item Crear extensiones de Firefox, Chrome,...
+\end{itemize}
+
+\end{hslide}
+
+\end{document}

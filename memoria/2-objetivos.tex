@@ -1,0 +1,109 @@
+\chapter{Objetivos y Metodología}
+\label{ch:Objetivos}
+
+Una vez presentado el contexto general sobre el que se asienta este
+trabajo, vamos a describir los
+objetivos concretos que pretendemos resolver con la realización de
+este TFG y los requisitos que han condicionado la solución
+desarrollada.
+
+
+\section{Descripción del problema} \label{sec:descripcion}
+
+El objetivo general del TFG consiste en crear versiones web de seis herramientas 
+de JdeRobot muy utilizadas y que actualmente están programadas en C++ o 
+Python con su propio interfaz gráfico, que usa bibliotecas como QT o GTK y que sólo se puede ejecutar en Linux. 
+Éstas versiones web van a ser multiplataforma (Linux, Android, IOS, Windows,...), van a usar el navegador web como interfaz gráfico y nos va a 
+permitir acceder a los sensores y actuadores sin un servidor web intermedio.
+
+Este objetivo final lo hemos divido en cinco sub-objetivos:
+
+\begin{enumerate}
+
+\item \emph{CameraViewJS:} Creación del cliente web similar a la herramienta \texttt{CameraView} para visualizar imágenes procedentes del servidor \texttt{Cameraserver}. 
+
+\item \emph{RGBDViewerJS:} Creación del cliente web similar a la herramienta RGBDViewer para visualizar datos de color y profundidad procedentes del servidor \texttt{Openni1Server}.
+  
+\item \emph{KobukiViewerJS:} Creación de un teleoperador para poder ver, manejar y ver los datos de los sensores de los robots Kobuki y Pioneer del laboratorio de robótica de la URJC. Versión web de \texttt{KobukiViewer}
+  
+  
+\item \emph{UavViewerJS:} Creación del cliente web similar a la herramienta UavViewer para teleoperar drones tanto reales como simulados y ver los datos de sus sensores.
+  
+  
+\item Creación de dos herramientas que además de mostrar los datos sensoriales del robot y ofrecer su teleoperación, permite
+ insertar código que gobierna el comportamiento autónomo de robots Kobuki y drones (IntrorobKobukiJS e IntrorobUavJS). 
+
+\end{enumerate}
+
+
+Además, se ha creado una página web para contener a todos los clientes.
+
+\section{Requisitos} \label{sec:requisitos}
+
+Se deben satisfacer los siguientes requisitos:
+\begin{itemize}
+ \item Se tiene que usar la última versión de JdeRobot, la 5.3.1.
+ \item La comunicación con los servidores de sensores y actuadores debe ser en tiempo real.
+ \item No habrá servidores web intermedios, a diferencia de los antecedentes descritos en las secciones \ref{ssec:s4} y \ref{ssec:s5}.
+ \item Debe ser lo suficientemente maduro para poder integrarse en el repositorio oficial de JdeRobot y ser usado por terceros fácilmente.
+\end{itemize}
+
+
+
+\section{Metodología y plan de trabajo}
+
+Para el desarrollo de este TFG se ha seguido el método de desarrollo en espiral. Este
+sistema se basa en iteraciones sucesivas en la que cada bucle o iteración representa un
+conjunto de actividades. Estas actividades incluyen tal y como muestra la figura \ref{fig:espiral}: análisis
+de los requerimientos del sistema, diseño del mismo, implementación y pruebas.
+
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{img/espiral.png}
+\caption{Modelo en espiral}
+\label{fig:espiral}
+\end{figure}
+
+Éste TFG se ha ido documentando en un Mediawiki \cite{Mediawiki}. Este cuaderno de bitácora
+ha servido de apoyo a las reuniones con el tutor. Como complemento a
+este Mediawiki se ha utilizado un repositorio público svn \cite{Repositorio} donde se ha guardado y
+está accesible todo el código fuente de este TFG.
+
+El plan de trabajo, repartido en diferentes fases, con el fin de utilizar en cada fase nueva desarrollos ya creados en las anteriores, ha sido el siguiente: 
+
+\begin{itemize}
+
+\item \textbf{Aprendizaje de JdeRobot:} Primer contacto con la plataforma con el objetivo de saber cómo funciona.
+
+\item \textbf{Familiarización con las tecnologías web a utilizar:} Tiene el objetivo de aprender lo necesario sobre HTML, JavaScript, CSS, WebGL, ThreeJS. Primeros contactos con ICE-JS, 
+\textit{middleware} utilizado para la comunicación entre los clientes que se van a crear y los servidores de JdeRobot.
+
+\item \textbf{Desarrollo de CameraViewJS:} En esta fase se crea el módulo que recibe el flujo de vídeo, que es la base del cliente.
+
+
+\item \textbf{Desarrollo de RGBDViewerJS:} Se crea un módulo para recibir el flujo de imágenes de distancia, 
+  juntando este flujo con otro de vídeo (ambos procedentes de un Kinect) mediante lo aprendido de ThreeJS se crea una representación 
+  en 3D de los datos recibidos por el sensor.
+ 
+\item \textbf{KobukiViewerJS:} Se crea un módulo que permite interactuar con los motores de dicho robot 
+  mediante un control con ThreeJS. Se incluyen dos flujos de vídeo que representan cada una de 
+  las cámaras. Además, se crean los módulos para recibir la información láser y odometría y una representación 3D del robot moviéndose según los datos recibidos de la 
+  odometría y se muestran los datos del láser.
+  
+\item \textbf{UavViewerJS:} Se crea un módulo que mediante dos controles iguales a los del teleoperador anterior permite mover el UAV. 
+  Además, se utiliza una representación de indicadores de un avión para los datos de posición recibidos, al igual que se crea una representación 3D.
+  
+  
+\item \textbf{Introrob:} A \textit{KobukiViewerJS} y a \textit{UavViewerJS} se les añade la opción de poder agregar comportamiento autónomo en vez de teleoperarlos.
+
+
+\item \textbf{Diseño final de la web:} Se adapta el diseño de la web para que sea vistoso y fácil de manejar e integre todos los desarrollos anteriores.
+
+\end{itemize}
+
+
+Además, se han hecho reuniones periódicas con el tutor para tener un seguimiento adecuado del desarrollo del mismo, que están documentadas en la bitácora\footnote{\url{http://jderobot.org/Aitormf-tfg}}.
+
+

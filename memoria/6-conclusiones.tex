@@ -1,0 +1,61 @@
+\chapter{Conclusiones}
+\label{ch:Conclusiones}
+
+En los capítulos anteriores se ha hecho una descripción del problema y se ha presentado
+la solución desarrollada. Además, se ha argumentado la elección final de diseño y se han
+presentado las pruebas realizadas. En este capítulo se analizarán las conclusiones a la luz
+del trabajo realizado y se proponen posibles líneas futuras de desarrollo.
+
+\section{Conclusiones}
+
+Tras analizar el trabajo realizado se puede apreciar que se ha
+conseguido el objetivo general. Se han creado 6 clientes web multiplataforma y multidispositivo para JdeRobot 
+que permiten acceder sensores y actuadores de robots mediante el navegador web sin servidores intermedios, para ello se han programado 7245 líneas de código.  
+Además, se han hecho lo suficientemente modulares para que sea fácil extender su funcionalidad. 
+Los 6 clientes están validados experimentalmente, valen tanto para sensores, robots y drones reales como para 
+simulados, incluso se han exhibido en la Global Robot Expo, 
+feria de robótica en Madrid\footnote{\url{http://blog.jderobot.org/estuvimos-en-global-robot-expo/}}
+
+
+Se han conseguido todos los subobjetivos: se han creado \texttt{CameraViewJS} que recibe imágenes de \texttt{cameraserver}, \texttt{RgbdViewerJS} que visualiza datos de profundidad y color.
+También se han creado \texttt{KobukiVieweJS y UavViewerJS} que permiten teleoperar los robots y drones del laboratorio de robótica de la URJC. El último subobjetivo también se ha cumplido, 
+se han desarrollado \texttt{IntrorobKobukiJS e IntrorobUavJS} que permiten insertar código que gobierna el comportamiento autónomo de los robots y drones.
+
+También se han satisfecho todos los requisitos del capítulo \ref{ch:Objetivos}:
+\begin{itemize}
+\item Los componentes desarrollados usan la última versión de JdeRobot: 5.3.1.
+ \item Los seis clientes se conectan a los servidores ICE sin usar servidor web intermedio gracias a ICE JS. 
+ Cada conexión a dichos servidores se hace desde un hilo diferente para no sobrecargar la interfaz. 
+ \item Las comunicaciones con los servidores son en tiempo real.
+ \item Son lo suficientemente maduros para incluirlos 
+en el repositorio oficial\footnote{\url{https://github.com/RoboticsURJC/JdeRobot/pull/322}} de JdeRobot.
+ \item Son multiplataforma y multidispositivo, al estar desarrollados en tecnologías web, 
+ con un sólo desarrollo, se pueden ejecutar en cualquier sistema con navegador web, ya sean Windows, Linux, MacOS, IOS,...
+\end{itemize}
+
+Los resultados de este proyecto, documentación, código, vídeos y demás
+material están disponibles en la página web del
+TFG \footnote{\url{http://jderobot.org/Aitormf-tfg}}.
+
+
+\section{Trabajos futuros}
+
+Este TFG sienta las bases para posteriores trabajos en el uso de las tecnologías web de última generación en JdeRobot.
+Hemos identificado cuatro líneas por las que se puede extender este TFG. Primero se podrían crear extensiones para los navegadores con cada cliente, las extensiones permiten agregar funcionalidades que no vienen de serie a los navegadores, 
+así por ejemplo se pueden bloquear anuncios, tener conexión directa con nuestros correos desde cualquier web,.... En nuestro caso ya no sería 
+necesario un servidor HTTP que nos proporcione la página web del cliente sino que el cliente ya estaría en el navegador.
+
+Segundo, también se podrían adaptar \texttt{IntrorobUavJS e IntrorobKobukiJS} a \textbf{Node JS}.
+Así se podrían programar comportamientos autónomos de los robots en JavaScript usando ICE-JS para comunicar con los drivers y 
+el núcleo de dichos clientes pero sin necesidad de GUI.
+
+Tercero, otro futuro trabajo puede ser modificar \texttt{API.Camera} para que permita la compresión de imágenes e incluso negociar 
+la resolución de las mismas para aumentar el flujo. 
+El servidor ya está preparado para ello pero los clientes no. 
+Y en el caso de \texttt{RgbdViewerJS} poderse conectar con la interfaz de la nube de 
+puntos de \texttt{openni1Server}, que actualmente no es compatible con ICE JS por parte del servidor.
+
+Por último, se puede mejorar la interfaz de los teleoperadores, en especial \texttt{UavViewerJS}. 
+Actualmente en los móviles no se pueden tener los dos controles en la pantalla ya que son pequeñas, esto dificulta su uso. 
+El objetivo sería poder manejar el drone con el móvil/tablet en horizontal usando las dos manos. 
+Además de añadir el uso de \textit{gamepads} para complementar los controles y botones.
