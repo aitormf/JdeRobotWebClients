@@ -8,13 +8,14 @@ fi
 
 dest=$1/introrobuavjs
 wd=$(pwd)
-depthr=(colladaloader trackballcontrols)
+depthr=(colladaloader trackballcontrols joystickcontrols)
 depice=()
 depjdr=()
 depjq=(flightindicators)
-depboot=(bootstrap-toggle)
+depboot=()
+#depboot=(bootstrap-toggle)
 depapi=(camera cmdvel pose3d ardroneextra)
-depgui=(robotloaders joystick)
+depgui=(robotloaders control)
 
 echo "making introrobuav"
 

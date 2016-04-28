@@ -20,13 +20,12 @@ function putDfEP (eps){
    $('#epcmdvel').val(eps.cmdvel);
 }
 $(document).ready(function() {
-   console.log("Buuaa");
    var client;
    load();
    config.control1id="control1";
    config.control2id="control2";
    config.cam1id="camView";
-   //config.modelid="model";
+   config.modelid="model";
    config.takeoffbtnid="takeoff";
    config.resetbtnid="reset";
    config.landbtnid="land";
@@ -37,14 +36,11 @@ $(document).ready(function() {
    config.altimeterid="altimeter";
    config.turn_coordinatorid="turn_coordinator";
    
-   console.log("Beeeee");
    $('#start').on('click', function(){
-      console.log("aaaa");
 		client = new UavViewer(config);
          client.start();
       $("canvas.border-light").removeClass("border-light");
 	});
-   console.log("Buudadasd");
    $('#stop').on('click', function(){
          client.stop();
 	});
@@ -121,13 +117,7 @@ $(document).ready(function() {
 		}
 		p++;
 	  }
-
    }
-   
-   var dblTouch = {
-      firstT: false,
-      timeout: undefined
-   };
    
    var fullScreen = function(){
       var canvas = $("#camView");
@@ -144,20 +134,9 @@ $(document).ready(function() {
 	  } 
    };
    
-   function onTouch (){
-      if (dblTouch.firstT){
-         fullScreen();
-         dblTouch.firstT= false;
-         clearTimeout(dblTouch.timeout);
-      }else{
-         dblTouch.firstT= true;
-         dblTouch.timeout= setTimeout(function(){ dblTouch.firstT= false; }, 500);
-      }
-   }
    
-   
-   $("#camView").on("dblclick", fullScreen);
-   $("#camView").on("touchstart", onTouch);
+   $("#camView").on("click", fullScreen);
+   $("#camView").on("touchstart", fullScreen);
    
 });
 

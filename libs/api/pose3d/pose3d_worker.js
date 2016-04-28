@@ -3,8 +3,8 @@ var window=self;
 var global=self;
 
 // importing required files
-importScripts('Ice.min.js');
-importScripts('jderobot/pose3d.js');
+importScripts('../Ice.min.js');
+importScripts('../jderobot/pose3d.js');
 
 
 // variables related to the configuration and connection of ICE

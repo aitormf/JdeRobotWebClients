@@ -20,7 +20,7 @@
  *       + extraepname (name of Motors endpoint, default Pose3D)
  */
 function UavViewer (config){
-   console.log(config);
+   //console.log(config);
    /*************************
     **** Public objects  ****
     *************************/
@@ -110,7 +110,6 @@ function UavViewer (config){
       imgData.data.set(data.imgData);
       ctx2.putImageData(imgData,0,0);
       ctx.drawImage(canvas2, 0, 0,ctx.canvas.width,ctx.canvas.height);
-	console.log(data.width);
    };
    
 
@@ -300,7 +299,6 @@ function UavViewer (config){
     */
    this.start= function(){
       //worker, serv, camid checks
-      console.log("starting");
       if (!window.Worker) {
          alert("This application does not work in this browser");
          return;
@@ -325,11 +323,10 @@ function UavViewer (config){
          alert("Not defined controlid");
          return;
       }
-      /*if (!this.modelid) {
+      if (!this.modelid) {
          alert("Not defined modelid");
          return;
-      }*/
-      console.log("1");
+      }
       var sizeInd = $("#camView").height()/5;
       attitude = $.flightIndicator('#'+this.attitudeid, 'attitude', {showBox : false, size: sizeInd}); // Horizon
       heading = $.flightIndicator('#'+this.headingid, 'heading', {showBox:false, size: sizeInd}); // Compass
@@ -337,7 +334,6 @@ function UavViewer (config){
       turn_coordinator = $.flightIndicator('#'+this.turn_coordinatorid, 'turn_coordinator', {showBox : false, size: sizeInd});
       
       //pose3d in initModel
-      console.log("2");
       cmdvel = new API.CmdVel ({server:this.cmdvelserv,epname:this.cmdvelepname});
       cmdvel.connect();
       extra = new API.ArDroneExtra ({server:this.extraserv,epname:this.extraepname});
@@ -350,22 +346,7 @@ function UavViewer (config){
        $('#'+this.landbtnid).on('click', function(){
          extra.land();
 	  });
-      console.log("3");
-      /*$('#'+this.stopbtnid).on('click', function(){
-         control1.removeListeners();
-         control2.removeListeners();
-         initControls();
-         cmdSend = {
-            linearX:0,
-            linearY:0,
-            linearZ:0,
-            angularX:0,
-            angularY:0,
-            angularZ:0		
-         };
-         cmdvel.setCmdVel(cmdSend);
-         
-	  });*/
+
       extra.connect();
       camera1 = new API.Camera ({server:this.cam1serv,epname:this.cam1epname});
       camera1.canvas = document.getElementById(self.cam1id);
@@ -376,7 +357,6 @@ function UavViewer (config){
       camera1.timeoutE=timeout;
       camera1.connect();
       camera1.startStreaming();
-      console.log("4");
       initGL();
       console.log("started");
    };
@@ -397,10 +377,10 @@ function UavViewer (config){
       return camera1.isRunning || pose3d.isRunning || cmdvel.isRunning || extra.isRunning;
    };
    
-   /*this.resizeCameraModel= function(){
+   this.resizeCameraModel= function(){
       model.camera.aspect = model.renderer.domElement.width / model.renderer.domElement.height;
       model.camera.updateProjectionMatrix();
       model.renderer.render(model.scene,model.camera);
    
-   };*/
+   };
 }

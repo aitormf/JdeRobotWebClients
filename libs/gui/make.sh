@@ -9,6 +9,7 @@ else
 fi
 
 dest=$1/js
+raiz=$1
 guifile=$dest/gui.js
 x=$(pwd)
 
@@ -24,7 +25,8 @@ then
        joystick)
 	    cp joystick/joystick.js $dest;;
        robotloaders)
-	    cp robotloaders/robotloaders.js $dest;;
+	    cp robotloaders/robotloaders.js $dest
+       cp -r robotloaders/robotmodels $raiz;;
     esac
     shift
   done
@@ -40,6 +42,7 @@ else
        joystick)
 	    sed 1d joystick/joystick.js >> $guifile;;
        robotloaders)
+       cp -r robotloaders/robotmodels $raiz
 	    sed 1d robotloaders/robotloaders.js >> $guifile;;
     esac
     shift

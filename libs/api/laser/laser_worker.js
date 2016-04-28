@@ -3,12 +3,12 @@ var window=self;
 var global=self;
 
 // importing required files
-importScripts('Ice.min.js');
-importScripts('jderobot/datetime.js');
-importScripts('jderobot/exceptions.js');
-importScripts('jderobot/containers.js');
-importScripts('jderobot/common.js');
-importScripts('jderobot/laser.js');
+importScripts('../Ice.min.js');
+importScripts('../jderobot/datetime.js');
+importScripts('../jderobot/exceptions.js');
+importScripts('../jderobot/containers.js');
+importScripts('../jderobot/common.js');
+importScripts('../jderobot/laser.js');
 
 
 // variables related to the configuration and connection of ICE

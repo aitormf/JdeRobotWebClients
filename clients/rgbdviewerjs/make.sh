@@ -30,8 +30,6 @@ if ! $dev;
 then
   # sustitucion de api
   ../../scripts/joinlib.sh $dest/rgbdviewer.html api.js rgbdviewer.js ${depapi[@]}
-  #sustitucion de gui
-  ../../scripts/joinlib.sh $dest/rgbdviewer.html gui.js rgbdviewer.js ${depgui[@]}
 fi
 
 

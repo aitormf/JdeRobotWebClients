@@ -26,7 +26,7 @@ API.RobotLoader = function (){
       var chassisLoader = new THREE.ColladaLoader(self.manager);
       chassisLoader.options.convertUpAxis = true;
       chassisLoader.load(
-	        'js/libs/robotloaders/pioneer/chassis.dae',
+	        'robotmodels/pioneer/chassis.dae',
 	        function ( collada ) {
        
                var obj = collada.scene;
@@ -45,7 +45,7 @@ API.RobotLoader = function (){
       var wheelLoader = new THREE.ColladaLoader(self.manager);
       wheelLoader.options.convertUpAxis = true;
       wheelLoader.load(
-	        'js/libs/robotloaders/pioneer/wheel.dae',
+	        'robotmodels/pioneer/wheel.dae',
 	        function ( collada ) {
        
                var obj = collada.scene;
@@ -116,7 +116,7 @@ API.RobotLoader = function (){
       var bodyLoader = new THREE.ColladaLoader(self.manager);
       bodyLoader.options.convertUpAxis = true;
       bodyLoader.load(
-	        'js/libs/robotloaders/kobuki/create_body.dae',
+	        'robotmodels/kobuki/create_body.dae',
 	        function ( collada ) {
        
                var obj = collada.scene;
@@ -136,7 +136,7 @@ API.RobotLoader = function (){
       var plate0Loader = new THREE.ColladaLoader(self.manager);
       plate0Loader.options.convertUpAxis = true;
       plate0Loader.load(
-	        'js/libs/robotloaders/kobuki/plate_0_logo.dae',
+	        'robotmodels/kobuki/plate_0_logo.dae',
 	        function ( collada ) {
        
                var obj = collada.scene;
@@ -156,7 +156,7 @@ API.RobotLoader = function (){
       var plate1Loader = new THREE.ColladaLoader(self.manager);
       plate1Loader.options.convertUpAxis = true;
       plate1Loader.load(
-	        'js/libs/robotloaders/kobuki/plate_1_logo.dae',
+	        'robotmodels/kobuki/plate_1_logo.dae',
 	        function ( collada ) {
        
                var obj = collada.scene;
@@ -183,7 +183,7 @@ API.RobotLoader = function (){
       var plate2Loader = new THREE.ColladaLoader(self.manager);
       plate2Loader.options.convertUpAxis = true;
       plate2Loader.load(
-	        'js/libs/robotloaders/kobuki/plate_2_logo.dae',
+	        'robotmodels/kobuki/plate_2_logo.dae',
 	        function ( collada ) {
        
                var obj = collada.scene;
@@ -203,7 +203,7 @@ API.RobotLoader = function (){
       var spacerLoader = new THREE.ColladaLoader(self.manager);
       spacerLoader.options.convertUpAxis = true;
       spacerLoader.load(
-	        'js/libs/robotloaders/kobuki/68-02403-125_Spacer.dae',
+	        'robotmodels/kobuki/68-02403-125_Spacer.dae',
 	        function ( collada ) {
        
                var obj = collada.scene;
@@ -244,7 +244,7 @@ API.RobotLoader = function (){
       var standoffLoader = new THREE.ColladaLoader(self.manager);
       standoffLoader.options.convertUpAxis = true;
       standoffLoader.load(
-	        'js/libs/robotloaders/kobuki/68-04552-2000-RA_Turtlebot_M-F_Standoff.dae',
+	        'robotmodels/kobuki/68-04552-2000-RA_Turtlebot_M-F_Standoff.dae',
 	        function ( collada ) {
        
                var obj = collada.scene;
@@ -315,7 +315,7 @@ API.RobotLoader = function (){
       var standoff8Loader = new THREE.ColladaLoader(self.manager);
       standoff8Loader.options.convertUpAxis = true;
       standoff8Loader.load(
-	        'js/libs/robotloaders/kobuki/68-02421-8000-RA_Turtlebot_F-F_Standoff.dae',
+	        'robotmodels/kobuki/68-02421-8000-RA_Turtlebot_F-F_Standoff.dae',
 	        function ( collada ) {
        
                var obj = collada.scene;
@@ -364,7 +364,7 @@ API.RobotLoader = function (){
       var chassisLoader = new THREE.ColladaLoader(self.manager);
       chassisLoader.options.convertUpAxis = true;
       chassisLoader.load(
-	        'js/libs/robotloaders/quadrotor/red_quadrotor.dae',
+	        'robotmodels/quadrotor/red_quadrotor.dae',
 	        function ( collada ) {
        
                var obj = collada.scene;
