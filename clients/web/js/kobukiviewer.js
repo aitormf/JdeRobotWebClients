@@ -214,7 +214,7 @@ function KobukiViewer (config){
          
       };
       
-      var loader = new API.RobotLoader();
+      var loader = new GUI.RobotLoader();
        
       loader.loadKobuki(1,function () {
                model.robot=loader.robot;

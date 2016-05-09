@@ -232,7 +232,7 @@ function UavViewer (config){
          
       };
       
-      var loader = new API.RobotLoader();
+      var loader = new GUI.RobotLoader();
        
       loader.loadQuadrotor(0.05,function () {
                model.robot=loader.robot;

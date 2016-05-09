@@ -1,7 +1,7 @@
-var API = API || {};
+var GUI = GUI || {};
 
 
-API.RobotLoader = function (){
+GUI.RobotLoader = function (){
    
    this.manager = new THREE.LoadingManager();
    
