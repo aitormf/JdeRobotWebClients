@@ -40,7 +40,49 @@ function calculateFPS(){
          frameCount=0; 
        }
       return fps;
-   };
+   }
+
+function calculateDelay(time) {
+   var d = new Date();
+   var currentTime = d.getTime();
+   return currentTime - time;
+
+}
+
+var procesar = [];
+
+procesar["RGB8"] = function (pixelData, width, height){
+   // Once received the image (RGB), I adapt it to the format that canvas needs (RGBA)
+   var imgData=new Uint8Array(4*width*height);
+   var j=0;
+   var length = imgData.length;
+   
+   for (var i=0;i<length;i+=4)
+   {
+     imgData[i+0]=pixelData[j+0];
+     imgData[i+1]=pixelData[j+1];
+     imgData[i+2]=pixelData[j+2];
+     imgData[i+3]=255;
+     j+=3;
+   }
+   return imgData;
+};
+
+procesar["DEPTH8_16"] = function (pixelData, width, height){
+   // Once received the image (RGB), I adapt it to the format that canvas needs (RGBA)
+   var imgData=new Uint8Array(4*width*height);
+   var j=0;
+   var length = imgData.length;
+   for (var i=0;i<length;i+=4)
+   {
+      imgData[i+0]=pixelData[j+0];
+      imgData[i+1]=pixelData[j+0];
+      imgData[i+2]=pixelData[j+0];
+      imgData[i+3]=255;
+      j+=3;
+   }
+   return imgData;
+};
 
 
 
@@ -71,41 +113,25 @@ function connect (epname, server){
 
 // makes the request to the server
 function getImage(imgFormat){
+   var time = new Date().getTime();
     srv.getImageData(imgFormat).then(function (data){
-               //console.log(data);
+               //console.log(data.timeStamp.useconds);
+               var currentTime = new Date().getTime();
+                var delay = currentTime - time;
                 var pixelData = data.pixelData;
                 var width = data.description.width;
                 var height = data.description.height;
                 // Once received the image (RGB), I adapt it to the format that canvas needs (RGBA)
-                var imgData=new Uint8Array(4*width*height);
-                var j=0;
-                var length = imgData.length;
-                if (imgFormat.indexOf("depth")>-1 || imgFormat.indexOf("DEPTH")>-1){
-                  for (var i=0;i<length;i+=4)
-                  {
-                    imgData[i+0]=pixelData[j+0];
-                    imgData[i+1]=pixelData[j+0];
-                    imgData[i+2]=pixelData[j+0];
-                    imgData[i+3]=255;
-                    j+=3;
-                  }
-                   
-                }else{
-                  for (var i=0;i<length;i+=4)
-                  {
-                    imgData[i+0]=pixelData[j+0];
-                    imgData[i+1]=pixelData[j+1];
-                    imgData[i+2]=pixelData[j+2];
-                    imgData[i+3]=255;
-                    j+=3;
-                  }
-               }
-               var fps = calculateFPS();
+                var imgData=procesar[imgFormat](pixelData, width, height);
+                var fps = calculateFPS();
                 img={width: width,
                               height: height,
                               imgData: imgData,
                               pixelData: pixelData,
-                              fps:fps};
+                              fps:fps,
+                     time: currentTime,
+                     delay: delay
+                    };
                 postMessage({desc:description,img:img});
                 if (stream){
                   getImage(imgFormat);
