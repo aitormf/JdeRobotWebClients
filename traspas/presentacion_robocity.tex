@@ -50,7 +50,7 @@
 In the last years, several robotic frameworks (SDKs) 
 have appeared that simplify and speed up the development of robot applications.
 
-The SDK facilitate access to the sensors and actuators of the robots.
+The SDKs facilitate access to the sensors and actuators of the robots.
 \begin{minipage}[t]{0.5\textwidth}
 \begin{figure}[htb]
 \centering
@@ -94,7 +94,7 @@ The SDK facilitate access to the sensors and actuators of the robots.
 \begin{itemize}
 \item Provides a distributed component-based programming environment.
 \item Components may be written in C++, Python, Java, JavaScript...
-\item Use ICE: Allows cross-language and cross-platform communications.
+\item Uses ICE: Allows cross-language and cross-platform communications.
 \item currently supports Cameras, RGBD sensors, Kobuki, ArDrone,...
 \end{itemize}
 \begin{minipage}[t]{0.5\textwidth}
@@ -176,18 +176,6 @@ Web tools have been developed using last generation web technologies like HTML5,
 %%---------------------------------------------------------------
 \begin{hslide}
 \slsubsect{RgbdViewerJS}
-
-\begin{center}
-Este cliente recibe información de un sensor Kinect.
-\begin{figure}
-\includegraphics[width=0.9\textwidth]{img/esq_rgbdviewerjs.png}
-\end{figure}
-\end{center}
-\end{hslide}
-
-%%---------------------------------------------------------------
-\begin{hslide}
-\slsubsect{RgbdViewerJS}
 \begin{itemize}
 \item Images like in CameraViewJS. 
 \item When two camera images have been received, creates the 3D point cloud and shown in the 3D model.
@@ -212,7 +200,7 @@ Este cliente recibe información de un sensor Kinect.
 \begin{itemize}
 \item Images like in CameraViewJS.
 \item Whenever it receives a Pose3D, modifies the position and orientation of the robot in the 3D model.
-\item When it receive information from laser, creates a 2D and other 3D image.
+\item When it receives information from laser, creates a 2D and other 3D image.
 \item Whenever you move the control speed orders are sended.
 \end{itemize}
 \end{minipage}
@@ -290,19 +278,6 @@ URJC                                                 & 100/100                  
 \item Four webtools have been created in JdeRobot that allow to teleoperate wheeled robots or drones and to monitor cameras and RGBD sensors from any browser.
 \item Multitplatform and multi-device
 \item They use advanced web technologies like WebSockets, WebGL and WebWorkers
-\end{itemize}
-\end{hslide}
-
-
-\begin{hslide}
-\slsect{References}
-\begin{itemize}
- \item OSRF, Gazebo simulator web page, 2016  \url{http://gazebosim.org/}
-
-\item JdeRobot web page, 2016 \url{http://jderobot.org}
-\item Martínez, A., Final Degree Project ``Tecnologías web en la plataforma robótica JdeRobot''. Esc.Téc.Sup.Ing. Telecomunicación, URJC, 2016. 
-%\url{https://github.com/aitormf/JdeRobotWebClients/blob/master/memoria/memoria.pdf}
-\item ZeroC ICE middleware, 2016 \url{https://doc.zeroc.com/display/Ice35/Home}
 \end{itemize}
 \end{hslide}
 
