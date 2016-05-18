@@ -68,6 +68,7 @@ function CameraView (config){
       camera.onmessage = function (event){
          camera.onmessageDefault(event);
          var respwork = camera.data;
+			var delay = camera.delay;
          //camera
          var canvas2 = document.createElement('canvas');
          var ctx2=canvas2.getContext("2d");       
@@ -85,9 +86,8 @@ function CameraView (config){
          if (respwork.fps){
             fps.html(Math.floor(respwork.fps));
          }
-         $('#delay1').html(respwork.delay);
-         var tt = new Date().getTime();
-         $('#delay2').html(tt - respwork.time);
+         $('#delay1').html(delay.net);
+         $('#delay2').html(delay.worker);
          
       };
       camera.connect();

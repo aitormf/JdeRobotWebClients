@@ -19,7 +19,7 @@
  *       + extraserv (server's direction and port)={dir:direction,port: port}
  *       + extraepname (name of Motors endpoint, default Pose3D)
  */
-function UavViewer (config){
+function UavViewer(config) {
    //console.log(config);
    /*************************
     **** Public objects  ****
@@ -47,19 +47,6 @@ function UavViewer (config){
    this.cam1epname=config.cam1epname || "Camera";
    this.extraepname = config.extraepname || "Extra";
    this.pose3depname = config.pose3depname || "Pose3D";
-
-   var model = {id: this.modelid,
-                WIDTH: 320,
-                HEIGHT: 320,
-                VIEW_ANGLE: 50,
-                NEAR: 0.1,
-                FAR: 5000,
-                robot:undefined,
-                renderer:undefined,
-                camera: undefined,
-                controls: undefined,
-   };
-   model.ASPECT=model.WIDTH / model.HEIGHT;
    
    var extra;
    var camera1;
@@ -86,6 +73,29 @@ function UavViewer (config){
    var heading;
    var altimeter;
    var turn_coordinator;
+
+   var model = {id: this.modelid,
+                container: $('#'+this.modelid),
+                WIDTH: 320,
+                HEIGHT: 320,
+                VIEW_ANGLE: 50,
+                NEAR: 0.1,
+                FAR: 5000,
+                ASPECT: undefined,
+                robot: undefined,
+                scene: undefined,
+                renderer: undefined,
+                camera: undefined,
+                controls: undefined,
+                animation: undefined,
+                active: false,
+   };
+   
+   model.ASPECT=model.WIDTH / model.HEIGHT;
+   
+   //console.log(model.container.outerHTML);
+   
+   
       
 
    
@@ -102,7 +112,8 @@ function UavViewer (config){
    var drawCamera = function (data,canvas){
       //camera
       var canvas2 = document.createElement('canvas');
-      var ctx2=canvas2.getContext("2d");       
+      var ctx2=canvas2.getContext("2d");  
+      //console.log(data);
       var imgData=ctx2.getImageData(0,0,data.width,data.height);
       ctx2.canvas.width=data.width;
       ctx2.canvas.height=data.height;
@@ -165,6 +176,7 @@ function UavViewer (config){
    
    
     var initModel = function (){
+      //model.container = $('#'+this.modelid);
       var canv = document.getElementById(model.id);
       model.camera = new THREE.PerspectiveCamera(model.VIEW_ANGLE, model.ASPECT, model.NEAR, model.FAR);
       model.camera.position.set( -5, 5, 2 );
@@ -226,46 +238,25 @@ function UavViewer (config){
       model.scene.add(ground); 
                                         
       var modelAnimation = function(){
-         requestAnimationFrame(modelAnimation);
+         model.animation = requestAnimationFrame(modelAnimation);
          model.controls.update();
          model.renderer.render(model.scene,model.camera);
          
       };
       
-      var loader = new GUI.RobotLoader();
-       
-      loader.loadQuadrotor(0.05,function () {
-               model.robot=loader.robot;
-               model.scene.add( model.robot );
-         
-               pose3d = new API.Pose3D({server:self.pose3dserv,epname:self.pose3depname});
-               pose3d.onmessage= function (event){
-                  pose3d.onmessageDefault(event);
-                  model.robot.position.set(pose3d.data.x,pose3d.data.z,-pose3d.data.y);
-                  model.robot.rotation.set(pose3d.data.pitch,pose3d.data.yaw,pose3d.data.roll);
-                  model.robot.updateMatrix();
-                  model.renderer.render(model.scene,model.camera);
-                  // Attitude update
-                  attitude.setRoll(-pose3d.data.roll * toDegrees);
-                  attitude.setPitch(-pose3d.data.pitch * toDegrees);
-
-                   // Altimeter update
-                   altimeter.setAltitude(pose3d.data.z*100);
-
-                   // TC update
-                   turn_coordinator.setTurn(-pose3d.data.roll * toDegrees);
-
-                   // Heading update
-                   heading.setHeading(pose3d.data.yaw * toDegrees);
-               };
-         
-               pose3d.timeoutE=timeout;
-         
-               pose3d.connect();
-               pose3d.startStreaming();
-               
-               modelAnimation();
-	        });
+      
+      
+      if (model.robot==undefined) {
+         var loader = new GUI.RobotLoader();
+         loader.loadQuadrotor(0.05,function() {
+            model.robot=loader.robot;
+            model.scene.add( model.robot );
+            modelAnimation();
+	     });
+      } else {
+         model.scene.add( model.robot );
+         modelAnimation();
+      }
    };
    
    /*
@@ -274,7 +265,7 @@ function UavViewer (config){
     */
    var initGL = function(){
       initControls();
-      if (self.modelid){
+      if (self.modelid && model.active){
          initModel();
       }
    }
@@ -346,8 +337,8 @@ function UavViewer (config){
        $('#'+this.landbtnid).on('click', function(){
          extra.land();
 	  });
-
       extra.connect();
+      
       camera1 = new API.Camera ({server:this.cam1serv,epname:this.cam1epname});
       camera1.canvas = document.getElementById(self.cam1id);
       camera1.onmessage= function (event){
@@ -357,8 +348,31 @@ function UavViewer (config){
       camera1.timeoutE=timeout;
       camera1.connect();
       camera1.startStreaming();
+      
+      pose3d = new API.Pose3D({server:self.pose3dserv,epname:self.pose3depname});
+      pose3d.onmessage = function(event) {
+         pose3d.onmessageDefault(event);
+         if (model.active) {
+            model.robot.position.set(pose3d.data.x,pose3d.data.z,-pose3d.data.y);
+            model.robot.rotation.set(pose3d.data.pitch,pose3d.data.yaw,pose3d.data.roll);
+            model.robot.updateMatrix();
+         //model.renderer.render(model.scene,model.camera);
+         }
+         // Attitude update
+         attitude.setRoll(-pose3d.data.roll * toDegrees);
+         attitude.setPitch(-pose3d.data.pitch * toDegrees);
+         // Altimeter update
+         altimeter.setAltitude(pose3d.data.z*100);
+         // TC update
+         turn_coordinator.setTurn(-pose3d.data.roll * toDegrees);
+         // Heading update
+         heading.setHeading(pose3d.data.yaw * toDegrees);
+      };
+      pose3d.timeoutE=timeout;
+      pose3d.connect();
+      pose3d.startStreaming();
+      
       initGL();
-      console.log("started");
    };
    
    this.stop = function(){
@@ -378,9 +392,38 @@ function UavViewer (config){
    };
    
    this.resizeCameraModel= function(){
-      model.camera.aspect = model.renderer.domElement.width / model.renderer.domElement.height;
-      model.camera.updateProjectionMatrix();
-      model.renderer.render(model.scene,model.camera);
+      if (model.active) {
+         model.camera.aspect = model.renderer.domElement.width / model.renderer.domElement.height;
+         model.camera.updateProjectionMatrix();
+         model.renderer.render(model.scene,model.camera);
+      }
+   };
    
+   this.modelON = function() {
+      model.active = true;
+      if (self.modelid && !model.renderer){
+         console.log("ON");
+         initModel();
+      }
+   };
+   
+   this.modelOFF = function() {
+      
+      model.active = false;
+      if (self.modelid && model.renderer){
+         console.log("OFF");
+         cancelAnimationFrame(model.animation);// Stop the animation
+         //model.renderer.domElement.addEventListener('dblclick', null, false); //remove listener to render
+         model.scene = null;
+         model.renderer = undefined;
+         model.camera = undefined;
+         model.controls = undefined;
+         var m = model.container.clone();
+         var parent = model.container.parent();
+         model.container.remove();
+         parent.append(m);
+         model.container = m;
+         
+      }
    };
 }

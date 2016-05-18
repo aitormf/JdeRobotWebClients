@@ -44,6 +44,12 @@ $(document).ready(function() {
    $('#stop').on('click', function(){
          client.stop();
 	});
+   $('#on').on('click', function(){
+         client.modelON();
+	});
+   $('#off').on('click', function(){
+         client.modelOFF();
+	});
    
     $('#DfReal').on('click', function(){
          putDfEP(realEP);

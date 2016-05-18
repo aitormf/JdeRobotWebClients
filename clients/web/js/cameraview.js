@@ -85,6 +85,10 @@ function CameraView (config){
          if (respwork.fps){
             fps.html(Math.floor(respwork.fps));
          }
+         $('#delay1').html(respwork.delay);
+         var tt = new Date().getTime();
+         $('#delay2').html(tt - respwork.time);
+         
       };
       camera.connect();
       camera.startStreaming();

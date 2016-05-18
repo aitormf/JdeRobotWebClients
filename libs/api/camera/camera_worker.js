@@ -113,33 +113,35 @@ function connect (epname, server){
 
 // makes the request to the server
 function getImage(imgFormat){
-   var time = new Date().getTime();
-    srv.getImageData(imgFormat).then(function (data){
-               //console.log(data.timeStamp.useconds);
-               var currentTime = new Date().getTime();
-                var delay = currentTime - time;
-                var pixelData = data.pixelData;
-                var width = data.description.width;
-                var height = data.description.height;
-                // Once received the image (RGB), I adapt it to the format that canvas needs (RGBA)
-                var imgData=procesar[imgFormat](pixelData, width, height);
-                var fps = calculateFPS();
-                img={width: width,
-                              height: height,
-                              imgData: imgData,
-                              pixelData: pixelData,
-                              fps:fps,
-                     time: currentTime,
-                     delay: delay
-                    };
-                postMessage({desc:description,img:img});
-                if (stream){
-                  getImage(imgFormat);
-                };
+	var time = new Date().getTime();
+   	srv.getImageData(imgFormat).then(function (data){
+			//console.log(data.timeStamp.useconds);
+			var currentTime = new Date().getTime();
+			
+			var delay = {net: (currentTime - time),
+							 _ctime: currentTime};
+			
+			var pixelData = data.pixelData;
+			var width = data.description.width;
+			var height = data.description.height;
+			// Once received the image (RGB), I adapt it to the format that canvas needs (RGBA)
+			var imgData=procesar[imgFormat](pixelData, width, height);
+			var fps = calculateFPS();
+			img={width: width,
+					height: height,
+					imgData: imgData,
+					pixelData: pixelData,
+					fps:fps
+			  };
+
+			postMessage({desc:description,img:img, delay:delay});
+			if (stream){
+				getImage(imgFormat);
+			};
                 
-        },function(err,ar){
-       console.log(ar);
-       console.log(err);});
+		},function(err,ar){
+      	console.log(ar);
+       	console.log(err);});
 }
 
 
@@ -148,7 +150,7 @@ function getImage(imgFormat){
 function getCameraDescription(){
     srv.getCameraDescription().then(function (data){
                 description=data;
-                postMessage({desc:description,img:img});
+                postMessage({desc:description, img:img, delay:{}});
                 
         },function(err,ar){
        console.log(ar);
