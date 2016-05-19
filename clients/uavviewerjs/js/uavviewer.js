@@ -97,7 +97,6 @@ function UavViewer(config) {
    
    
       
-
    
    /*************************
     **** Private methods ****
@@ -289,6 +288,10 @@ function UavViewer(config) {
     * start
     * run client 
     */
+   
+   var media1 = 0;
+      var media2 = 0;
+      var medias = 0;
    this.start= function(){
       //worker, serv, camid checks
       if (!window.Worker) {
@@ -340,13 +343,20 @@ function UavViewer(config) {
 	  });
       extra.connect();
       
+      
+      
       camera1 = new API.Camera ({server:this.cam1serv,epname:this.cam1epname});
       camera1.canvas = document.getElementById(self.cam1id);
       camera1.onmessage= function (event){
             camera1.onmessageDefault(event);
             drawCamera(camera1.data,camera1.canvas);
-				$('#delay1').html(camera1.delay.net);
-         $('#delay2').html(camera1.delay.worker);
+            var text = "FPS:"+camera1.data.fps+" net:"+camera1.delay.net+" worker:"+camera1.delay.worker+"\n";
+            document.getElementById("debug").value += text;
+            medias++;
+            media1+=camera1.delay.net;
+            media2+=camera1.delay.worker;
+				//$('#delay1').html(camera1.delay.net);
+         //$('#delay2').html(camera1.delay.worker);
       };
       camera1.timeoutE=timeout;
       camera1.connect();
@@ -405,7 +415,11 @@ function UavViewer(config) {
    this.modelON = function() {
       model.active = true;
       if (self.modelid && !model.renderer){
-         console.log("ON");
+         //console.log("ON");
+         document.getElementById("debug").value += "--------Model ON -----------\n";
+         $("#media1").html(media1/medias);
+         $("#media2").html(media2/medias);
+         media1 = media2 = medias =0;
          initModel();
       }
    };
@@ -414,7 +428,11 @@ function UavViewer(config) {
       
       model.active = false;
       if (self.modelid && model.renderer){
-         console.log("OFF");
+         //console.log("OFF");
+         document.getElementById("debug").value += "--------Model OFF -----------\n";
+         $("#media1").html(media1/medias);
+         $("#media2").html(media2/medias);
+         media1 = media2 = medias =0;
          cancelAnimationFrame(model.animation);// Stop the animation
          //model.renderer.domElement.addEventListener('dblclick', null, false); //remove listener to render
          model.scene = null;

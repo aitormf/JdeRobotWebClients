@@ -121,6 +121,7 @@ function UavViewer(config) {
       imgData.data.set(data.imgData);
       ctx2.putImageData(imgData,0,0);
       ctx.drawImage(canvas2, 0, 0,ctx.canvas.width,ctx.canvas.height);
+		
    };
    
 
@@ -344,6 +345,8 @@ function UavViewer(config) {
       camera1.onmessage= function (event){
             camera1.onmessageDefault(event);
             drawCamera(camera1.data,camera1.canvas);
+				$('#delay1').html(camera1.delay.net);
+         $('#delay2').html(camera1.delay.worker);
       };
       camera1.timeoutE=timeout;
       camera1.connect();
