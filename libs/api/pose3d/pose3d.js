@@ -116,7 +116,7 @@ API.Pose3D= function (config){
     */
    this.conErr=function(){
       alert ("connection to server "+self.epname+" "+self.server.dir+":"+self.server.port+" failed");
-     // self.deleteWork();
+     self.deleteWork();
    };
    
    this.createWork();

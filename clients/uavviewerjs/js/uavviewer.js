@@ -350,8 +350,8 @@ function UavViewer(config) {
       camera1.onmessage= function (event){
             camera1.onmessageDefault(event);
             drawCamera(camera1.data,camera1.canvas);
-            var text = "FPS:"+camera1.data.fps+" net:"+camera1.delay.net+" worker:"+camera1.delay.worker+"\n";
-            document.getElementById("debug").value += text;
+            //var text = "FPS:"+camera1.data.fps+" net:"+camera1.delay.net+" worker:"+camera1.delay.worker+"\n";
+            //document.getElementById("debug").value += text;
             medias++;
             media1+=camera1.delay.net;
             media2+=camera1.delay.worker;
