@@ -92,10 +92,6 @@ function UavViewer(config) {
    };
    
    model.ASPECT=model.WIDTH / model.HEIGHT;
-   
-   //console.log(model.container.outerHTML);
-   
-   
       
    
    /*************************
@@ -178,9 +174,7 @@ function UavViewer(config) {
     var initModel = function (){
       //model.container = $('#'+this.modelid);
       var canv = document.getElementById(model.id);
-        console.log(model.ASPECT);
       model.ASPECT=canv.width/canv.height;
-        console.log(model.ASPECT);
       model.camera = new THREE.PerspectiveCamera(model.VIEW_ANGLE, model.ASPECT, model.NEAR, model.FAR);
       model.camera.position.set( -5, 5, 2 );
       
@@ -294,9 +288,9 @@ function UavViewer(config) {
     * run client 
     */
    
-   var media1 = 0;
+  /* var media1 = 0;
       var media2 = 0;
-      var medias = 0;
+      var medias = 0;*/
    this.start= function(){
       //worker, serv, camid checks
       if (!window.Worker) {

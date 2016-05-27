@@ -65,12 +65,6 @@ $(document).ready(function() {
          client.stop();
        $('#mod-toggle').prop( "disabled", true );
 	});
-   /*$('#on').on('click', function(){
-         client.modelON();
-	});
-   $('#off').on('click', function(){
-         client.modelOFF();
-	});*/
    
    $('#mod-toggle').change(function(evt) {
       if ($(this).prop('checked') && client){

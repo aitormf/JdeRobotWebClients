@@ -12,7 +12,7 @@ depthr=(colladaloader trackballcontrols joystickcontrols)
 depice=()
 depjdr=()
 depjq=()
-depboot=()
+depboot=(bootstrap-toggle)
 depapi=(camera motors pose3d laser)
 depgui=(robotloaders control)
 

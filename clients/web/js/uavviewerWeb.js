@@ -58,17 +58,13 @@ $(document).ready(function() {
    $('#start').on('click', function(){
 		client = new UavViewer(config);
          client.start();
-      $("canvas.border-light").removeClass("border-light");
+       $('#mod-toggle').prop( "disabled", false );
 	});
+    
    $('#stop').on('click', function(){
          client.stop();
+       $('#mod-toggle').prop( "disabled", true );
 	});
-   /*$('#on').on('click', function(){
-         client.modelON();
-	});
-   $('#off').on('click', function(){
-         client.modelOFF();
-	});*/
    
    $('#mod-toggle').change(function(evt) {
       if ($(this).prop('checked') && client){
