@@ -178,12 +178,17 @@ function UavViewer(config) {
     var initModel = function (){
       //model.container = $('#'+this.modelid);
       var canv = document.getElementById(model.id);
+        console.log(model.ASPECT);
+      model.ASPECT=canv.width/canv.height;
+        console.log(model.ASPECT);
       model.camera = new THREE.PerspectiveCamera(model.VIEW_ANGLE, model.ASPECT, model.NEAR, model.FAR);
       model.camera.position.set( -5, 5, 2 );
       
       model.camera.lookAt(new THREE.Vector3( 0,0,0 ));
       
-      model.renderer = new THREE.WebGLRenderer({canvas:canv});
+      //model.renderer = new THREE.WebGLRenderer({canvas:canv});
+      model.renderer = new THREE.WebGLRenderer({canvas:canv, antialias: true});
+      model.renderer.setPixelRatio( window.devicePixelRatio );
       model.renderer.setClearColor( 0xffffff);
       
       model.scene=new THREE.Scene();
@@ -416,10 +421,10 @@ function UavViewer(config) {
       model.active = true;
       if (self.modelid && !model.renderer){
          //console.log("ON");
-         document.getElementById("debug").value += "--------Model ON -----------\n";
-         $("#media1").html(media1/medias);
-         $("#media2").html(media2/medias);
-         media1 = media2 = medias =0;
+         //document.getElementById("debug").value += "--------Model ON -----------\n";
+         //var text = "FPS:"+camera1.data.fps+" net:"+media1/medias+" worker:"+media2/medias+"\n";
+         //document.getElementById("debug").value += text;
+         //media1 = media2 = medias =0;
          initModel();
       }
    };
@@ -428,11 +433,13 @@ function UavViewer(config) {
       
       model.active = false;
       if (self.modelid && model.renderer){
-         //console.log("OFF");
-         document.getElementById("debug").value += "--------Model OFF -----------\n";
-         $("#media1").html(media1/medias);
-         $("#media2").html(media2/medias);
-         media1 = media2 = medias =0;
+         
+         //document.getElementById("debug").value += "--------Model OFF -----------\n";
+         //$("#media1").html(media1/medias);
+         //$("#media2").html(media2/medias);
+          //var text = "FPS:"+camera1.data.fps+" net:"+media1/medias+" worker:"+media2/medias+"\n";
+         //document.getElementById("debug").value += text;
+         //media1 = media2 = medias =0;
          cancelAnimationFrame(model.animation);// Stop the animation
          //model.renderer.domElement.addEventListener('dblclick', null, false); //remove listener to render
          model.scene = null;
